@@ -2,6 +2,7 @@ import { useEffect, useState, createContext } from "react";
 import { supabase } from "./supabaseClient";
 import Auth from "./auth";
 import UserHome from "./home";
+import { Routes, Route } from "react-router-dom";
 
 export const AppContext = createContext(null);
 
@@ -44,8 +45,20 @@ export default function App() {
   return (
     <div>
       <AppContext.Provider value = {{user}}>
-      {user ? <UserHome/> : <Auth/>}
+      <Routes>
+        <Route path = "/" element = {<Layout/>}>
+        <Route path = "/" element = {<UserHome/>}></Route>
+        <Route path = "/auth" element = {<Auth/>}></Route>
+        </Route>
+      </Routes>
       </AppContext.Provider>
     </div>
   )
 }
+
+function Layout() {
+  return (
+    <div>123</div>
+  )
+}
+
