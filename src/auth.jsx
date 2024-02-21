@@ -9,24 +9,25 @@ export default function Auth() {
       <SignIn />
     </div>
   )
+}
 
-  function SignUp() {
-    let [error, setError] = useState(null);
+function SignUp() {
+  let [error, setError] = useState(null);
 
-    async function signUp(ev) {
+  async function signUp(ev) {
+    ev.preventDefault();
+    setError(null)
+    let { error } = await supabase.auth.signUp({
+      email: ev.target.email.value,
+      password: ev.target.password.value,
+    });
 
-      setError(null)
-      let { error } = await supabase.auth.signUp({
-        email: "yedoipark@gmail.com",
-        password: "123123",
-      });
+    if (error) setError(error.message);
+  }
 
-      if (error) setError(error.message);
-    }
-
-    return (
-      <div className = "text-center text-xl mb-2"> Sign Up
-      <form className = "flex flex-col items-center space-y-2" onSubmit={signUp}>
+  return (
+    <div className="text-center text-xl mb-2"> Sign Up
+      <form className="flex flex-col items-center space-y-2" onSubmit={signUp}>
         <label className="form-control w-full max-w-xs">
           <div className="label">
             <span className="label-text">E-Mail</span>
@@ -47,27 +48,29 @@ export default function Auth() {
           Sign Up
         </button>
       </form>
-      {error && <div className = "text-error text-center mt-2">{error}</div>}
-      </div>
-    )
+      {error && <div className="text-error text-center mt-2">{error}</div>}
+    </div>
+  )
+}
+
+function SignIn() {
+  let [error, setError] = useState(null);
+  async function signIn(ev) {
+    ev.preventDefault();
+
+    setError(null);
+
+    let { error } = await supabase.auth.signInWithPassword({
+      email: ev.target.email.value,
+      password: ev.target.password.value,
+    })
+    if (error) console.log(error.message);
+    if (error) setError(error.message);
   }
 
-  function SignIn() {
-    let [error, setError] = useState(null);
-    async function signIn(ev) {
-      //setError(null);
-
-      let { error } = await supabase.auth.signInWithPassword({
-        email: "yedoipark@gmail.com",
-        password: "123123",
-      })
-      if (error) console.log(error.message);
-      //if (error) setError(error);
-    }
-
-    return (
-      <div className = "text-center text-xl mb-2"> Sign In
-      <form className = "flex flex-col items-center space-y-2" onSubmit={signIn}>
+  return (
+    <div className="text-center text-xl mb-2"> Sign In
+      <form className="flex flex-col items-center space-y-2" onSubmit={signIn}>
         <label className="form-control w-full max-w-xs">
           <div className="label">
             <span className="label-text">E-Mail</span>
@@ -88,9 +91,7 @@ export default function Auth() {
           Sign In
         </button>
       </form>
-      {error ? <div>Yes Error</div> : <div>No Error</div>}
-      </div>
-    )
-  }
-
+      {error && <div className = "text-error text-center m-2">{error}</div>}
+    </div>
+  )
 }
