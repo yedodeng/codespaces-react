@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, createContext } from "react";
 import { supabase } from "./supabaseClient";
 import Auth from "./auth";
 import UserHome from "./home";
 
+export const AppContext = createContext(null);
 
 export default function App() {
   let [user, setUser] = useState(undefined);
@@ -41,6 +42,10 @@ export default function App() {
   }
 
   return (
-    <div>123</div>
+    <div>
+      <AppContext.Provider value = {{user}}>
+      {user ? <UserHome/> : <Auth/>}
+      </AppContext.Provider>
+    </div>
   )
 }
