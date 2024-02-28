@@ -14,13 +14,21 @@ export default function Auth() {
 function SignUp() {
   let [error, setError] = useState(null);
 
+
   async function signUp(ev) {
     ev.preventDefault();
     setError(null)
-    let { error } = await supabase.auth.signUp({
-      email: ev.target.email.value,
-      password: ev.target.password.value,
-    });
+    const data = {
+      email: ev.target["email"].value,
+      password: ev.target["password"].value,
+      options: {
+        data: {
+          full_name: ev.target["full_name"].value,
+          grad_year: parseInt(ev.target["grad_year"].value),
+        },
+      },
+    };
+    let { error } = await supabase.auth.signUp(data);
 
     if (error) setError(error.message);
   }
@@ -44,6 +52,27 @@ function SignUp() {
           <div className="label">
           </div>
         </label>
+        <label className="form-control w-full max-w-xs">
+          <div className="label">
+            <span className="label-text">Full Name</span>
+          </div>
+          <input type="text" name="full_name" placeholder="John Doe" className="input input-bordered w-full max-w-xs" />
+          <div className="label">
+          </div>
+        </label>
+        <label className="form-control w-full max-w-xs">
+          <div className="label">
+            <span className="label-text">Grade</span>
+          </div>
+          <select className="select select-bordered w-full max-w-xs" name="grad_year">
+            <option selected value="2027">Freshman</option>
+            <option value="2026">Sophmore</option>
+            <option value="2025">Junior</option>
+            <option value="2024">Senior</option>
+          </select>
+          <div className="label">
+          </div>
+        </label>
         <button className="btn btn-sm btn-primary">
           Sign Up
         </button>
@@ -59,10 +88,10 @@ function SignIn() {
     ev.preventDefault();
 
     setError(null);
-
+    const bol = True;
     let { error } = await supabase.auth.signInWithPassword({
-      email: ev.target.email.value,
-      password: ev.target.password.value,
+      email: bol ? "yedo@gmail.com" : ev.target.email.value,
+      password: bol ? "yedoyedo" : ev.target.password.value,
     })
     if (error) console.log(error.message);
     if (error) setError(error.message);

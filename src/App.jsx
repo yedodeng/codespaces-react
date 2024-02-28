@@ -4,6 +4,7 @@ import Auth from "./auth";
 import UserHome from "./home";
 import { Routes, Route, Outlet, Link } from "react-router-dom";
 import About from "./about";
+// import {supabase} from 
 
 export const AppContext = createContext(null);
 
