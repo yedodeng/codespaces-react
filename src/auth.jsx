@@ -91,7 +91,7 @@ function SignIn() {
           Sign In
         </button>
       </form>
-      {error && <div className = "text-error text-center m-2">{error}</div>}
+      {error && <div className="text-error text-center m-2">{error}</div>}
     </div>
   )
 }
