@@ -10,12 +10,17 @@ export const AppContext = createContext(null);
 
 export default function App() {
   let [user, setUser] = useState(undefined);
+  const loadUserData = async (userId) => {
+    const { data } = await supabase.from("profiles").select("*, roles(*)").eq("id", userId).single();
+    setUser(data);
+  };
+
 
   useEffect(() => {
     supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         // signed
-        setUser(session.user);
+        loadUserData(session.user.id);
       } else {
         // signed out
         setUser(undefined)
@@ -23,22 +28,6 @@ export default function App() {
     })
   }, [])
 
-  async function signUp() {
-    let { error } = await supabase.auth.signUp({
-      email: "abc@gmail.com",
-      password: "abcabc",
-    });
-
-    if (error) console.log(error.message);
-  }
-
-  async function signIn() {
-    let { error } = await supabase.auth.signInWithPassword({
-      email: "abc@gmail.com",
-      password: "abcabc",
-    })
-    if (error) console.log(error.message);
-  }
 
   async function signOut() {
     supabase.auth.signOut();

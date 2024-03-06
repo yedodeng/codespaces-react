@@ -65,10 +65,11 @@ function SignUp() {
             <span className="label-text">Grade</span>
           </div>
           <select className="select select-bordered w-full max-w-xs" name="grad_year">
-            <option selected value="2027">Freshman</option>
+            <option defaultValue="2027">Freshman</option>
             <option value="2026">Sophmore</option>
             <option value="2025">Junior</option>
             <option value="2024">Senior</option>
+            <option value="1">N/A</option>
           </select>
           <div className="label">
           </div>
@@ -88,9 +89,9 @@ function SignIn() {
     ev.preventDefault();
 
     setError(null);
-    const bol = True;
+    const bol = true;
     let { error } = await supabase.auth.signInWithPassword({
-      email: bol ? "yedo@gmail.com" : ev.target.email.value,
+      email: bol ? "yedo@btreecode.com" : ev.target.email.value,
       password: bol ? "yedoyedo" : ev.target.password.value,
     })
     if (error) console.log(error.message);
