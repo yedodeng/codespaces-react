@@ -4,6 +4,7 @@ import Auth from "./auth";
 import UserHome from "./home";
 import { Routes, Route, Outlet, Link } from "react-router-dom";
 import About from "./about";
+import Club from "./club";
 // import {supabase} from 
 
 export const AppContext = createContext(null);
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/" element={<Layout />}>
             <Route path="/" element={<UserHome />}></Route>
             <Route path="/about" element={<About />}></Route>
+            <Route path="/club/:user_id" element={<Club />}></Route>
           </Route>
         </Routes>
       </AppContext.Provider>
