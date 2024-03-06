@@ -89,7 +89,7 @@ function SignIn() {
     ev.preventDefault();
 
     setError(null);
-    const bol = true;
+    const bol = false;
     let { error } = await supabase.auth.signInWithPassword({
       email: bol ? "yedo@btreecode.com" : ev.target.email.value,
       password: bol ? "yedoyedo" : ev.target.password.value,
