@@ -36,6 +36,16 @@ export default function UserHome() {
     read();
   }
 
+  async function handleDeleteClub(club_id) {
+    if (confirm("Confirm Deletetion>")) {
+      const {data, error} = await supabase 
+      .from("clubs")
+      .delete()
+      .eq("club_id", club_id)
+    }
+    read();
+  }
+
 
   let { user } = useContext(AppContext);
   return (
@@ -46,7 +56,12 @@ export default function UserHome() {
           <div className="flex flex-col border-2 p-2 border-secondary w-1/3 mb-4" key={v.id}>
             <div className="text-xl mb-2">{v.name}</div>
             {/* <div className="text-sm text-gray-500">Created at {v.created_at}</div> */}
-            {user.roles.is_admin && (<button className="btn btn-xs btn-warning" onClick={() => handleUpdateClub(v.club_id)}>Edit</button>)}
+            {user.roles.is_admin && (
+            <div>
+            <button className="btn btn-xs btn-warning mr-4" onClick={() => handleUpdateClub(v.club_id)}>Edit</button>
+            <button className = "btn btn-xs bg-red-400" onClick={()=> handleDeleteClub(v.club_id)}> Delete</button>
+            </div>
+            )}
         </div>
         ))}
       </div>
