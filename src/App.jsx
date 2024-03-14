@@ -41,7 +41,7 @@ export default function App() {
           <Route path="/" element={<Layout />}>
             <Route path="/" element={<UserHome />}></Route>
             <Route path="/about" element={<About />}></Route>
-            <Route path="/club/:user_id" element={<Club />}></Route>
+            <Route path="/club/:club_id" element={<Club />}></Route>
           </Route>
         </Routes>
       </AppContext.Provider>
