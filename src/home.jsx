@@ -1,13 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "./App"
 import { supabase } from "./supabaseClient";
-import { useResolvedPath } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function UserHome() {
 
   let { user } = useContext(AppContext);
   let [reveal, setReveal] = useState(false);
-
 
   useEffect(() => {
     read()
@@ -64,8 +63,6 @@ export default function UserHome() {
     }
     read();
   }
-
-
   
   return (
     <div>
@@ -73,7 +70,7 @@ export default function UserHome() {
       <div>
         {items.filter((v) => v.club_memberships?.length > 0 || user.roles.is_admin).map((v) => (
           <div className="flex flex-col border-2 p-2 border-secondary w-1/3 mb-4" key={v.id}>
-            <div className="text-xl mb-2">{v.name}</div>
+            <Link to={`/club/${v.club_id}`} className="text-xl mb-2">{v.name}</Link>
             {/* <div className="text-sm text-gray-500">Created at {v.created_at}</div> */}
             
             <div className = "flex">
@@ -88,7 +85,6 @@ export default function UserHome() {
             
         </div>
         ))}
-
 
           {reveal && 
           <div>
@@ -106,8 +102,7 @@ export default function UserHome() {
             <button className = "btn btn-xs bg-red-400" onClick={()=> handleDeleteClub(v.club_id)}> Delete</button>
             </div>
               )}
-            </div>
-            
+            </div>       
         </div>
         ))}
         </div>

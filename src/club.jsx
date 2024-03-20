@@ -8,13 +8,11 @@ export default function Club() {
     let { club_id } = useParams();
     let [club, setClub] = useState(undefined);
 
-
     useEffect(() => {
         if (club_id) {
             handleLoadClub();
         }
     }, [])
-
 
     async function handleLoadClub() {
         const { data, error } = await supabase
@@ -29,21 +27,19 @@ export default function Club() {
     }
 
     async function handleUpdateRole(user_id, role) {
-        const {error} = await supabase
-        .from("club_memberships")
-        .update({role,})
-        .eq("club_id", club_id)
-        .eq("user_id", user_id)
+        const { error } = await supabase
+            .from("club_memberships")
+            .update({ role, })
+            .eq("club_id", club_id)
+            .eq("user_id", user_id)
     }
- 
-
 
     if (typeof club == "undefined") return <div>Loading...</div>;
 
     return (
         <div>
             <div className="text-center text-2xl font-bold">{club ? club.name : ""}</div>
-            <div>{club.description}</div>
+            <Description club={club} club_id={club_id} />
             <div className="text-center xl font-bold p-3">Members</div>
             <div className="overflow-x-auto bg-base-100 rounded">
                 <table className="table">
@@ -64,9 +60,9 @@ export default function Club() {
                                 <td>{mem.profiles.grad_year}</td>
                                 <td>
                                     {user.roles.is_admin ?
-                                        <select className="select select-primary select-xs" 
-                                        defaultValue={mem.role}
-                                        onChange={(ev) => handleUpdateRole(mem.user_id, ev.target.value)}>
+                                        <select className="select select-primary select-xs"
+                                            defaultValue={mem.role}
+                                            onChange={(ev) => handleUpdateRole(mem.user_id, ev.target.value)}>
                                             <option value="Member">Member</option>
                                             <option value="Admin">Admin</option>
                                         </select> : mem.role}
@@ -79,6 +75,59 @@ export default function Club() {
             </div>
             <div className="my-4">Announcements</div>
             <div>Events</div>
+        </div>
+    )
+}
+
+function Description({ club }) {
+    let { user } = useContext(AppContext);
+    let [editDesc, setEditDesc] = useState(false);
+    let [newDesc, setNewDesc] = useState(club.description);
+    let [oldDesc, setOldDesc] = useState(club.description);
+    async function handleUpdateDesc(description) {
+        const { data, error } = await supabase
+            .from("clubs")
+            .update({ description: newDesc })
+            .eq("club_id", club.club_id)
+        setOldDesc(newDesc);
+    }
+
+    return (
+        <div className="px-5 text-sm">
+            {!editDesc && <div className="my-2">{newDesc}</div>}
+            {editDesc &&
+                <textarea className="textarea textarea-bordered w-full my-2"
+                    value={newDesc}
+                    onChange={(ev) => setNewDesc(ev.target.value)}>
+                </textarea>
+            }
+            {user.roles.is_admin ??
+                <div className="flex justify-end">
+                    {!editDesc ?
+                        <button
+                            onClick={() => setEditDesc(true)}
+                            className="btn btn-sm btn-warning"
+                        >
+                            Edit
+                        </button>
+                        :
+                        <>
+                            <button
+                                onClick={() => { setEditDesc(false); handleUpdateDesc() }}
+                                className="btn btn-sm btn-success mx-4"
+                            >
+                                Save
+                            </button>
+                            <button
+                                onClick={() => { setEditDesc(false); setNewDesc(oldDesc) }}
+                                className="btn btn-sm btn-error"
+                            >
+                                Cancel
+                            </button>
+                        </>
+                    }
+                </div>
+            }
         </div>
     )
 }
