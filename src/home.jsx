@@ -69,7 +69,7 @@ export default function UserHome() {
       <div>Welcome <strong>{user.full_name}!</strong></div>
       <div>
         {items.filter((v) => v.club_memberships?.length > 0 || user.roles.is_admin).map((v) => (
-          <div className="flex flex-col border-2 p-2 border-secondary w-1/3 mb-4" key={v.id}>
+          <div className="flex flex-col border-2 p-2 border-secondary w-1/3 mb-4" key={v.club_id}>
             <Link to={`/club/${v.club_id}`} className="text-xl mb-2">{v.name}</Link>
             {/* <div className="text-sm text-gray-500">Created at {v.created_at}</div> */}
             

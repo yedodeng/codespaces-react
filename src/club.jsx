@@ -2,11 +2,13 @@ import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom"
 import { supabase } from "./supabaseClient";
 import { AppContext } from "./App";
+import Modal from "./components/modal";
 
 export default function Club() {
     let { user } = useContext(AppContext);
     let { club_id } = useParams();
     let [club, setClub] = useState(undefined);
+    let [showModal, setShowModal] = useState(true);
 
     useEffect(() => {
         if (club_id) {
@@ -34,6 +36,7 @@ export default function Club() {
     if (typeof club == "undefined") return <div>Loading...</div>;
 
     return (
+        <>
         <div>
             <div className="text-center text-2xl font-bold">{club ? club.name : ""}</div>
             <Description club={club} isAdmin={role == "Admin"} />
@@ -48,6 +51,8 @@ export default function Club() {
                 <div className="bold text-xl text-center my-4">Your application is currently pending</div>
             }
         </div>
+            <Modal show={showModal} close = {() => setShowModal(false)}/>
+        </>
     )
 }
 

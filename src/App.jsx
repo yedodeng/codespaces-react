@@ -6,6 +6,7 @@ import { Routes, Route, Outlet, Link } from "react-router-dom";
 import About from "./about";
 import Club from "./club";
 import Profile from "./profiles";
+import Modal from "./components/modal";
 
 export const AppContext = createContext(null);
 
@@ -66,7 +67,7 @@ function Layout() {
         </div>
         {user && (
           <div className = "flex items-center space-x-2">
-            <div className = "font-bold">
+            <div className = "text-xl font-bold">
               <Link to={`/profile/${user.id}`}>{user.full_name}</Link>
             </div>
             <button onClick={signOut} className="btn btn-error btn-small">
