@@ -5,7 +5,7 @@ import UserHome from "./home";
 import { Routes, Route, Outlet, Link } from "react-router-dom";
 import About from "./about";
 import Club from "./club";
-// import {supabase} from 
+import Profile from "./profiles";
 
 export const AppContext = createContext(null);
 
@@ -42,6 +42,7 @@ export default function App() {
             <Route path="/" element={<UserHome />}></Route>
             <Route path="/about" element={<About />}></Route>
             <Route path="/club/:club_id" element={<Club />}></Route>
+            <Route path="/profile/:user_id" element={<Profile />}></Route>
           </Route>
         </Routes>
       </AppContext.Provider>
@@ -63,9 +64,16 @@ function Layout() {
         <div className="text-xl font-bold flex-grow">
           <Link to="/about">About Us</Link>
         </div>
-        {user && (<div><button onClick={signOut} className="btn btn-error btn-small">
-          Sign Out
-        </button></div>)}
+        {user && (
+          <div className = "flex items-center space-x-2">
+            <div className = "font-bold">
+              <Link to={`/profile/${user.id}`}>{user.full_name}</Link>
+            </div>
+            <button onClick={signOut} className="btn btn-error btn-small">
+              Sign Out
+            </button>
+          </div>)
+        }
       </div>
       <div className="flex-grow bg-white p-5">{user ? <Outlet /> : <Auth />}</div>
     </div>

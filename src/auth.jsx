@@ -14,7 +14,6 @@ export default function Auth() {
 function SignUp() {
   let [error, setError] = useState(null);
 
-
   async function signUp(ev) {
     ev.preventDefault();
     setError(null)
@@ -89,9 +88,9 @@ function SignIn() {
     ev.preventDefault();
 
     setError(null);
-    const bol = false;
+    const bol = true;
     let { error } = await supabase.auth.signInWithPassword({
-      email: bol ? "yedo@btreecode.com" : ev.target.email.value,
+      email: ev.target.email.value,
       password: bol ? "yedoyedo" : ev.target.password.value,
     })
     if (error) console.log(error.message);
