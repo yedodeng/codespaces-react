@@ -8,7 +8,6 @@ export default function Club() {
     let { user } = useContext(AppContext);
     let { club_id } = useParams();
     let [club, setClub] = useState(undefined);
-    let [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         if (club_id) {
@@ -20,10 +19,11 @@ export default function Club() {
         (mem) => mem.user_id == user.id
     )?.role;
 
+
     async function handleLoadClub() {
         const { data, error } = await supabase
             .from("clubs")
-            .select("*, club_memberships(role, user_id, profiles(full_name, grad_year))")
+            .select("*, club_memberships(role, user_id, profiles(full_name, grad_year)), announcements(*)")
             .single()
             .eq("club_id", club_id)
 
@@ -37,24 +37,20 @@ export default function Club() {
 
     return (
         <>
-        <div>
-            <div className="text-center text-2xl font-bold">{club ? club.name : ""}</div>
-            <Description club={club} isAdmin={role == "Admin"} />
-            <div className="text-center xl font-bold p-3">Members</div>
-            <Members club={club} role={role} reload={handleLoadClub} />
-            {role != "Pending" ?
-                <>
-                    <div className="mt-4 my-2">Announcements</div>
-                    <button className = "btn btn-primary btn-sm" onClick={() => setShowModal(true)}>Show Modal</button>
-                    <div className="my-2">Events</div>
-                </>
-                :
-                <div className="bold text-xl text-center my-4">Your application is currently pending</div>
-            }
-        </div>
-            <Modal show={showModal} close = {() => setShowModal(false)}>
-                <textarea className="w-full"/>  
-            </Modal>
+            <div>
+                <div className="text-center text-3xl font-bold">{club ? club.name : ""}</div>
+                <Description club={club} isAdmin={role == "Admin"} />
+                <div className="text-center text-2xl font-bold p-3">Members</div>
+                <Members club={club} role={role} reload={handleLoadClub} />
+                {role != "Pending" ?
+                    <div className="my-4">
+                        <Announcements isAdmin={role == "Admin"} club={club} setClub={setClub} />
+                        <div className="my-2">Events</div>
+                    </div>
+                    :
+                    <div className="bold text-xl text-center my-4">Your application is currently pending</div>
+                }
+            </div>
         </>
     )
 }
@@ -193,6 +189,67 @@ function Members({ club, role, reload }) {
                     )) : ""}
                 </tbody>
             </table>
+        </div>
+    )
+}
+
+function Announcements({ isAdmin, club, setClub }) {
+    let [showModal, setShowModal] = useState(false);
+    let { user } = useContext(AppContext);
+
+    let announcements = club.announcements;
+    announcements.sort((a, b) => (a.created_at < b.created_at) ? 1 : -1);
+    async function handleAddAnnouncement(ev) {
+        ev.preventDefault();
+        let obj = {
+            club_id: club.club_id,
+            text: ev.target.text.value,
+            author: user.full_name
+        }
+        const { data, error } = await supabase
+            .from("announcements")
+            .insert(obj)
+            .select()
+            .single()
+
+        setClub({ ...club, announcements: [...club.announcements, data] });
+        setShowModal(false)
+    }
+
+    return (
+        <>
+            <div>
+                <div className="text-center text-2xl font-bold p-3">Announcements</div>
+                <div className="space-y-3">
+                    {club.announcements.map((a) => <Announcement key={a.ann_id} announcements={a} />)}
+                    {isAdmin &&
+                        <div className="flex justify-end">
+                            <button className="btn btn-sm btn-primary" onClick={() => setShowModal(true)}>Add Announcement</button>
+                        </div>
+                    }
+                </div>
+            </div>
+            <Modal show={showModal} close={() => setShowModal(false)}>
+                {showModal &&
+                    <form className="w-full flex flex-col space-y-3" onSubmit={handleAddAnnouncement}>
+                        <div className="font-bold text-center text-xl">Add Announcement</div>
+                        <textarea className="textarea textarea-primary" name="text"></textarea>
+                        <button className="btn btn-xs btn-primary">Submit</button>
+                    </form>
+                }
+            </Modal>
+        </>
+    )
+}
+
+function Announcement({ announcements, handleEditAnnouncement, handleDeleteAnnouncement }) {
+    return (
+        <div className="space-y-3 bg-base-300 p-3 rounded ">
+            <div>{announcements.text}</div>
+            <div className="flex justify-between items-center">
+                <div className="text-xs">{new Date(announcements.created_at).toDateString()}</div>
+                <div className="text-xs font-bold">{announcements.author}</div>
+            </div>
         </div>
     )
 }
