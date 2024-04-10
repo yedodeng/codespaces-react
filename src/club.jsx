@@ -8,7 +8,7 @@ export default function Club() {
     let { user } = useContext(AppContext);
     let { club_id } = useParams();
     let [club, setClub] = useState(undefined);
-    let [showModal, setShowModal] = useState(true);
+    let [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         if (club_id) {
@@ -45,13 +45,16 @@ export default function Club() {
             {role != "Pending" ?
                 <>
                     <div className="mt-4 my-2">Announcements</div>
-                    <div>Events</div>
+                    <button className = "btn btn-primary btn-sm" onClick={() => setShowModal(true)}>Show Modal</button>
+                    <div className="my-2">Events</div>
                 </>
                 :
                 <div className="bold text-xl text-center my-4">Your application is currently pending</div>
             }
         </div>
-            <Modal show={showModal} close = {() => setShowModal(false)}/>
+            <Modal show={showModal} close = {() => setShowModal(false)}>
+                <textarea className="w-full"/>  
+            </Modal>
         </>
     )
 }
