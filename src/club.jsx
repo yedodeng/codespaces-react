@@ -216,12 +216,38 @@ function Announcements({ isAdmin, club, setClub }) {
         setShowModal(false)
     }
 
+    async function handleEditAnnouncement(ev, close, ann_id) {
+        ev.preventDefault();
+
+        const {error} = await supabase.from("announcements").update({text: ev.target.text.value}).eq("ann_id", ann_id);
+
+        console.log(error);
+        setClub({...club, announcements: club.announcements.map((a) => a.ann_id == ann_id ? {...a, text:ev.target.text.value} : a)})
+        close();
+    }
+
+    async function handleDeleteAnnouncement(ann_id) {
+        const {error} = await supabase.
+        from("announcements")
+        .delete()
+        .eq("ann_id", ann_id);
+
+        setClub({
+            ...club,
+            announcements: club.announcements.filter(
+                (a) => a.ann_id != ann_id
+            ),
+        })
+
+    }
+
     return (
         <>
             <div>
                 <div className="text-center text-2xl font-bold p-3">Announcements</div>
                 <div className="space-y-3">
-                    {club.announcements.map((a) => <Announcement key={a.ann_id} announcements={a} />)}
+                    {club.announcements.map((a) => <Announcement key={a.ann_id} announcement={a}
+                        isAdmin={isAdmin} handleDeleteAnnouncement={handleDeleteAnnouncement} handleEditAnnouncement={handleEditAnnouncement} />)}
                     {isAdmin &&
                         <div className="flex justify-end">
                             <button className="btn btn-sm btn-primary" onClick={() => setShowModal(true)}>Add Announcement</button>
@@ -242,15 +268,35 @@ function Announcements({ isAdmin, club, setClub }) {
     )
 }
 
-function Announcement({ announcements, handleEditAnnouncement, handleDeleteAnnouncement }) {
+function Announcement({ announcement, handleEditAnnouncement, handleDeleteAnnouncement, isAdmin }) {
+    let [modalText, setModalText] = useState(null);
+
     return (
-        <div className="space-y-3 bg-base-300 p-3 rounded ">
-            <div>{announcements.text}</div>
-            <div className="flex justify-between items-center">
-                <div className="text-xs">{new Date(announcements.created_at).toDateString()}</div>
-                <div className="text-xs font-bold">{announcements.author}</div>
+        <>
+            <div className="space-y-3 bg-base-300 p-3 rounded ">
+                <div>{announcement.text}</div>
+                <div className="flex justify-between items-center">
+                    <div className="text-xs">{new Date(announcement.created_at).toDateString()}</div>
+                    <div className="flex items-center space-x-2">
+                        <div className="text-xs font-bold">{announcement.author}</div>
+                        {isAdmin && (
+                            <div className="space-x-2 ml-2">
+                                <button className="btn btn-xs btn-warning" onClick={() => {setModalText(announcement.text) }}>Edit</button>
+                                <button className="btn btn-xs btn-error" onClick={() => handleDeleteAnnouncement(announcement.ann_id)}>Delete</button>
+                            </div>)}
+                    </div>
+                </div>
             </div>
-        </div>
+            <Modal show={modalText} close={() => setModalText(null)}>
+                {modalText &&
+                    <form className="w-full flex flex-col space-y-3" onSubmit={(ev) => handleEditAnnouncement(ev, () => setModalText(null), announcement.ann_id)}>
+                        <div className="font-bold text-center text-xl">Edit Announcement</div>
+                        <textarea defaultValue={modalText} className="textarea textarea-primary" name="text"></textarea>
+                        <button className="btn btn-xs btn-primary">Submit</button>
+                    </form>
+                }
+            </Modal>
+        </>
     )
 }
 

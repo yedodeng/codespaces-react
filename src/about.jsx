@@ -1,5 +1,5 @@
 export default function About() {
     return (
-        <div>About Us</div>
+        <div>We are a devoted team ready to serve any of your needs. Please contact us at: </div>
     )
 }
