@@ -303,13 +303,17 @@ function Events({ isAdmin, club, setClub }) {
     let { user } = useContext(AppContext);
 
     let events = club.events;
-    events.sort((a, b) => (a.created_at < b.created_at) ? 1 : -1);
+    events.sort((a, b) => (a.date > b.date) ? 1 : -1);
     async function handleAddEvent(ev) {
         ev.preventDefault();
+
+        let date = new Date(`${ev.target.date.value} ${ev.target.time.value}`);
         let obj = {
             club_id: club.club_id,
             text: ev.target.text.value,
-            author: user.full_name
+            author: user.full_name,
+            title: ev.target.title.value,
+            date
         }
         const { data, error } = await supabase
             .from("events")
@@ -323,11 +327,17 @@ function Events({ isAdmin, club, setClub }) {
 
     async function handleEditEvent(ev, close, ev_id) {
         ev.preventDefault();
-
-        const {error} = await supabase.from("events").update({text: ev.target.text.value}).eq("ev_id", ev_id);
+        let date = new Date(`${ev.target.date.value} ${ev.target.time.value}`);
+        const {error} = await supabase.from("events")
+        .update({
+            text: ev.target.text.value,
+            title: ev.target.title.value,
+            date
+        })
+        .eq("ev_id", ev_id);
 
         console.log(error);
-        setClub({...club, events: club.events.map((a) => a.ev_id == ev_id ? {...a, text:ev.target.text.value} : a)})
+        setClub({...club, events: club.events.map((a) => a.ev_id == ev_id ? {...a, text:ev.target.text.value, title:ev.target.title.value, date} : a)})
         close()
     }
 
@@ -363,7 +373,13 @@ function Events({ isAdmin, club, setClub }) {
                 {showModal &&
                     <form className="w-full flex flex-col space-y-3" onSubmit={handleAddEvent}>
                         <div className="font-bold text-center text-xl">Add Event</div>
+                        <label>Event Title</label>
+                        <input type="text" name="title" className="input input-sm input-primary"/>
+                        <lable>Event Description</lable>
                         <textarea className="textarea textarea-primary" name="text"></textarea>
+                        <label>Event Date & Time</label>
+                        <input type="date" name="date" className="input input-sm input-primary"/>
+                        <input type="time" name="time" className="input input-sm input-primary"/>
                         <button className="btn btn-xs btn-primary">Submit</button>
                     </form>
                 }
@@ -374,13 +390,25 @@ function Events({ isAdmin, club, setClub }) {
 
 function Event({ event, handleEditEvent, handleDeleteEvent, isAdmin }) {
     let [modalText, setModalText] = useState(null);
+    let date = new Date(event.date);
+    let y = date.getFullYear();
+    let m = date.getMonth() + 1;
+    let d = date.getDate();
+    let t = date.toTimeString().substring(0,5);
+    let p = date.toLocaleTimeString().substring(0,4) +" " + date.toLocaleTimeString().substring (8,11);
+
+
+    date = `${y}-${m < 10 ? `0${m}` : m}-${d < 10 ? `0${d}`: d}`;
 
     return (
         <>
             <div className="space-y-3 bg-base-300 p-3 rounded ">
-                <div>{event.text}</div>
                 <div className="flex justify-between items-center">
-                    <div className="text-xs">{new Date(event.created_at).toDateString()}</div>
+                    <div className="font-bold text-xl">{event.title}</div>
+                    <div className="text-sm">At {`${p} ${date}`}</div>
+                </div>
+                <div>{event.text}</div>
+                <div className="flex justify-end items-center">
                     <div className="flex items-center space-x-2">
                         <div className="text-xs font-bold">{event.author}</div>
                         {isAdmin && (
@@ -395,7 +423,13 @@ function Event({ event, handleEditEvent, handleDeleteEvent, isAdmin }) {
                 {modalText &&
                     <form className="w-full flex flex-col space-y-3" onSubmit={(ev) => handleEditEvent(ev, () => setModalText(null), event.ev_id)}>
                         <div className="font-bold text-center text-xl">Edit Event</div>
-                        <textarea defaultValue={modalText} className="textarea textarea-primary" name="text"></textarea>
+                        <label>Event Title</label>
+                        <input defaultValue={event.title} type="text" name="title" className="input input-sm input-primary"/>
+                        <lable>Event Description</lable>
+                        <textarea defaultValue={event.text} className="textarea textarea-primary" name="text"></textarea>
+                        <label>Event Date & Time</label>
+                        <input defaultValue={date} type="date" name="date" className="input input-sm input-primary"/>
+                        <input defaultValue={t} type="time" name="time" className="input input-sm input-primary"/>
                         <button className="btn btn-xs btn-primary">Submit</button>
                     </form>
                 }
