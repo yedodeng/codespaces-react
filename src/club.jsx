@@ -22,9 +22,9 @@ export default function Club() {
     async function handleLoadClub() {
         const { data, error } = await supabase
             .from("clubs")
-            .select("*, club_memberships(role, user_id, profiles(full_name, grad_year)), announcements(*), events(*)")
+            .select("*, club_memberships(role, user_id, profiles(full_name, grad_year)), announcements(*), events(*, event_reservations(*))")
             .single()
-            .eq("club_id", club_id)
+            .eq("club_id", club_id).eq("events.event_reservations.user_id", user.id)
 
         if (error) alert(club_id);
         // console.log(data);
@@ -355,13 +355,52 @@ function Events({ isAdmin, club, setClub }) {
         })
     }
 
+    async function handleReserveEvent(ev_id, reserved) {
+        if (!reserved) {
+        const {data, error} = await supabase
+        .from("event_reservations")
+        .insert({
+            user_id: user.id,
+            ev_id
+        }).select().single();
+
+        setClub({
+            ...club,
+            events: club.events.map((ev) => 
+            ev.ev_id == ev_id
+            ? { ...ev, event_reservations: [data]}
+            : ev
+        )
+        });
+    } else {
+        const {data, error}  = await supabase
+        .from("event_reservations")
+        .delete()
+        .eq("user_id", user.id)
+
+        setClub({
+            ...club,
+            events: club.events.map((ev) => 
+            ev.ev_id == ev_id
+            ? { ...ev, event_reservations: []}
+            : ev
+        )
+        });
+
+        if (error) console.log(error.message);
+
+    }
+
+        
+    }
+
     return (
         <>
             <div>
                 <div className="text-center text-2xl font-bold p-3">Events</div>
                 <div className="space-y-3">
                     {club.events.map((a) => <Event key={a.ev_id} event={a}
-                        isAdmin={isAdmin} handleDeleteEvent={handleDeleteEvent} handleEditEvent={handleEditEvent} />)}
+                        isAdmin={isAdmin} handleDeleteEvent={handleDeleteEvent} handleEditEvent={handleEditEvent} handleReserveEvent={handleReserveEvent} />)}
                     {isAdmin &&
                         <div className="flex justify-end">
                             <button className="btn btn-sm btn-primary" onClick={() => setShowModal(true)}>Add Event</button>
@@ -388,7 +427,7 @@ function Events({ isAdmin, club, setClub }) {
     )
 }
 
-function Event({ event, handleEditEvent, handleDeleteEvent, isAdmin }) {
+function Event({ event, handleEditEvent, handleDeleteEvent, handleReserveEvent, isAdmin }) {
     let [modalText, setModalText] = useState(null);
     let date = new Date(event.date);
     let y = date.getFullYear();
@@ -408,7 +447,10 @@ function Event({ event, handleEditEvent, handleDeleteEvent, isAdmin }) {
                     <div className="text-sm">At {`${p} ${date}`}</div>
                 </div>
                 <div>{event.text}</div>
-                <div className="flex justify-end items-center">
+                <div className="flex justify-between items-center">
+                    <button onClick={() => handleReserveEvent(event.ev_id, event.event_reservations?.length > 0)} className={`btn btn-sm ${event.event_reservations?.length > 0 ? "btn-error" : "btn-primary"}`}>
+                        {event.event_reservations?.length > 0 ? "Cancel RSVP" : "RSVP"}
+                    </button>
                     <div className="flex items-center space-x-2">
                         <div className="text-xs font-bold">{event.author}</div>
                         {isAdmin && (
