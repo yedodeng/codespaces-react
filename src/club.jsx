@@ -19,7 +19,6 @@ export default function Club() {
         (mem) => mem.user_id == user.id
     )?.role;
 
-
     async function handleLoadClub() {
         const { data, error } = await supabase
             .from("clubs")
@@ -31,7 +30,6 @@ export default function Club() {
         // console.log(data);
         setClub(data);
     }
-
 
     if (typeof club == "undefined") return <div>Loading...</div>;
 
@@ -239,7 +237,6 @@ function Announcements({ isAdmin, club, setClub }) {
                 (a) => a.ann_id != ann_id
             ),
         })
-
     }
 
     return (
