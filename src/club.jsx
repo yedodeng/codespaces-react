@@ -23,7 +23,7 @@ export default function Club() {
     async function handleLoadClub() {
         const { data, error } = await supabase
             .from("clubs")
-            .select("*, club_memberships(role, user_id, profiles(full_name, grad_year)), announcements(*)")
+            .select("*, club_memberships(role, user_id, profiles(full_name, grad_year)), announcements(*), events(*)")
             .single()
             .eq("club_id", club_id)
 
@@ -45,7 +45,8 @@ export default function Club() {
                 {role != "Pending" ?
                     <div className="my-4">
                         <Announcements isAdmin={role == "Admin"} club={club} setClub={setClub} />
-                        <div className="my-2">Events</div>
+                        <Events isAdmin={role == "Admin"} club={club} setClub={setClub} />
+                        
                     </div>
                     :
                     <div className="bold text-xl text-center my-4">Your application is currently pending</div>
@@ -300,3 +301,108 @@ function Announcement({ announcement, handleEditAnnouncement, handleDeleteAnnoun
     )
 }
 
+function Events({ isAdmin, club, setClub }) {
+    let [showModal, setShowModal] = useState(false);
+    let { user } = useContext(AppContext);
+
+    let events = club.events;
+    events.sort((a, b) => (a.created_at < b.created_at) ? 1 : -1);
+    async function handleAddEvent(ev) {
+        ev.preventDefault();
+        let obj = {
+            club_id: club.club_id,
+            text: ev.target.text.value,
+            author: user.full_name
+        }
+        const { data, error } = await supabase
+            .from("events")
+            .insert(obj)
+            .select()
+            .single()
+
+        setClub({ ...club, events: [...club.events, data] });
+        setShowModal(false)
+    }
+
+    async function handleEditEvent(ev, close, ev_id) {
+        ev.preventDefault();
+
+        const {error} = await supabase.from("events").update({text: ev.target.text.value}).eq("ev_id", ev_id);
+
+        console.log(error);
+        setClub({...club, events: club.events.map((a) => a.ev_id == ev_id ? {...a, text:ev.target.text.value} : a)})
+        close()
+    }
+
+    async function handleDeleteEvent(ev_id) {
+        const {error} = await supabase.
+        from("events")
+        .delete()
+        .eq("ev_id", ev_id);
+
+        setClub({
+            ...club,
+            events: club.events.filter(
+                (a) => a.ev_id != ev_id
+            ),
+        })
+    }
+
+    return (
+        <>
+            <div>
+                <div className="text-center text-2xl font-bold p-3">Events</div>
+                <div className="space-y-3">
+                    {club.events.map((a) => <Event key={a.ev_id} event={a}
+                        isAdmin={isAdmin} handleDeleteEvent={handleDeleteEvent} handleEditEvent={handleEditEvent} />)}
+                    {isAdmin &&
+                        <div className="flex justify-end">
+                            <button className="btn btn-sm btn-primary" onClick={() => setShowModal(true)}>Add Event</button>
+                        </div>
+                    }
+                </div>
+            </div>
+            <Modal show={showModal} close={() => setShowModal(false)}>
+                {showModal &&
+                    <form className="w-full flex flex-col space-y-3" onSubmit={handleAddEvent}>
+                        <div className="font-bold text-center text-xl">Add Event</div>
+                        <textarea className="textarea textarea-primary" name="text"></textarea>
+                        <button className="btn btn-xs btn-primary">Submit</button>
+                    </form>
+                }
+            </Modal>
+        </>
+    )
+}
+
+function Event({ event, handleEditEvent, handleDeleteEvent, isAdmin }) {
+    let [modalText, setModalText] = useState(null);
+
+    return (
+        <>
+            <div className="space-y-3 bg-base-300 p-3 rounded ">
+                <div>{event.text}</div>
+                <div className="flex justify-between items-center">
+                    <div className="text-xs">{new Date(event.created_at).toDateString()}</div>
+                    <div className="flex items-center space-x-2">
+                        <div className="text-xs font-bold">{event.author}</div>
+                        {isAdmin && (
+                            <div className="space-x-2 ml-2">
+                                <button className="btn btn-xs btn-warning" onClick={() => {setModalText(event.text) }}>Edit</button>
+                                <button className="btn btn-xs btn-error" onClick={() => handleDeleteEvent(event.ev_id)}>Delete</button>
+                            </div>)}
+                    </div>
+                </div>
+            </div>
+            <Modal show={modalText} close={() => setModalText(null)}>
+                {modalText &&
+                    <form className="w-full flex flex-col space-y-3" onSubmit={(ev) => handleEditEvent(ev, () => setModalText(null), event.ev_id)}>
+                        <div className="font-bold text-center text-xl">Edit Event</div>
+                        <textarea defaultValue={modalText} className="textarea textarea-primary" name="text"></textarea>
+                        <button className="btn btn-xs btn-primary">Submit</button>
+                    </form>
+                }
+            </Modal>
+        </>
+    )
+}
