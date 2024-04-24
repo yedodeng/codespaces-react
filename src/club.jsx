@@ -39,7 +39,6 @@ export default function Club() {
             .eq("club_id", club_id)
 
         if (error) alert(club_id);
-        // console.log(data);
         setClub(data);
     }
 
@@ -368,7 +367,6 @@ function Events({ isAdmin, club, setClub, userIdNameMap }) {
     }
 
     async function handleReserveEvent(ev_id, reserved) {
-        console.log(reserved);
         if (!reserved) {
             const { data, error } = await supabase
                 .from("event_reservations")
