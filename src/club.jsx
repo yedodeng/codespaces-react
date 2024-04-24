@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom"
 import { supabase } from "./supabaseClient";
 import { AppContext } from "./App";
@@ -9,11 +9,23 @@ export default function Club() {
     let { club_id } = useParams();
     let [club, setClub] = useState(undefined);
 
+    
     useEffect(() => {
         if (club_id) {
             handleLoadClub();
         }
     }, [])
+
+    const userIdNameMap = useMemo(() => {
+        let m = new Map();
+
+        for(let i = 0; i < club?.club_memberships.length; i++) {
+            m.set(club.club_memberships[i].user_id, 
+            club.club_memberships[i].profiles.full_name);
+        }
+
+        return m;
+    }, [club]);
 
     let role = club?.club_memberships.find(
         (mem) => mem.user_id == user.id
@@ -24,7 +36,7 @@ export default function Club() {
             .from("clubs")
             .select("*, club_memberships(role, user_id, profiles(full_name, grad_year)), announcements(*), events(*, event_reservations(*))")
             .single()
-            .eq("club_id", club_id).eq("events.event_reservations.user_id", user.id)
+            .eq("club_id", club_id)
 
         if (error) alert(club_id);
         // console.log(data);
@@ -43,8 +55,8 @@ export default function Club() {
                 {role != "Pending" ?
                     <div className="my-4">
                         <Announcements isAdmin={role == "Admin"} club={club} setClub={setClub} />
-                        <Events isAdmin={role == "Admin"} club={club} setClub={setClub} />
-                        
+                        <Events isAdmin={role == "Admin"} club={club} setClub={setClub} userIdNameMap={userIdNameMap} />
+
                     </div>
                     :
                     <div className="bold text-xl text-center my-4">Your application is currently pending</div>
@@ -218,18 +230,18 @@ function Announcements({ isAdmin, club, setClub }) {
     async function handleEditAnnouncement(ev, close, ann_id) {
         ev.preventDefault();
 
-        const {error} = await supabase.from("announcements").update({text: ev.target.text.value}).eq("ann_id", ann_id);
+        const { error } = await supabase.from("announcements").update({ text: ev.target.text.value }).eq("ann_id", ann_id);
 
         console.log(error);
-        setClub({...club, announcements: club.announcements.map((a) => a.ann_id == ann_id ? {...a, text:ev.target.text.value} : a)})
+        setClub({ ...club, announcements: club.announcements.map((a) => a.ann_id == ann_id ? { ...a, text: ev.target.text.value } : a) })
         close();
     }
 
     async function handleDeleteAnnouncement(ann_id) {
-        const {error} = await supabase.
-        from("announcements")
-        .delete()
-        .eq("ann_id", ann_id);
+        const { error } = await supabase.
+            from("announcements")
+            .delete()
+            .eq("ann_id", ann_id);
 
         setClub({
             ...club,
@@ -279,7 +291,7 @@ function Announcement({ announcement, handleEditAnnouncement, handleDeleteAnnoun
                         <div className="text-xs font-bold">{announcement.author}</div>
                         {isAdmin && (
                             <div className="space-x-2 ml-2">
-                                <button className="btn btn-xs btn-warning" onClick={() => {setModalText(announcement.text) }}>Edit</button>
+                                <button className="btn btn-xs btn-warning" onClick={() => { setModalText(announcement.text) }}>Edit</button>
                                 <button className="btn btn-xs btn-error" onClick={() => handleDeleteAnnouncement(announcement.ann_id)}>Delete</button>
                             </div>)}
                     </div>
@@ -298,7 +310,7 @@ function Announcement({ announcement, handleEditAnnouncement, handleDeleteAnnoun
     )
 }
 
-function Events({ isAdmin, club, setClub }) {
+function Events({ isAdmin, club, setClub, userIdNameMap }) {
     let [showModal, setShowModal] = useState(false);
     let { user } = useContext(AppContext);
 
@@ -328,24 +340,24 @@ function Events({ isAdmin, club, setClub }) {
     async function handleEditEvent(ev, close, ev_id) {
         ev.preventDefault();
         let date = new Date(`${ev.target.date.value} ${ev.target.time.value}`);
-        const {error} = await supabase.from("events")
-        .update({
-            text: ev.target.text.value,
-            title: ev.target.title.value,
-            date
-        })
-        .eq("ev_id", ev_id);
+        const { error } = await supabase.from("events")
+            .update({
+                text: ev.target.text.value,
+                title: ev.target.title.value,
+                date
+            })
+            .eq("ev_id", ev_id);
 
         console.log(error);
-        setClub({...club, events: club.events.map((a) => a.ev_id == ev_id ? {...a, text:ev.target.text.value, title:ev.target.title.value, date} : a)})
+        setClub({ ...club, events: club.events.map((a) => a.ev_id == ev_id ? { ...a, text: ev.target.text.value, title: ev.target.title.value, date } : a) })
         close()
     }
 
     async function handleDeleteEvent(ev_id) {
-        const {error} = await supabase.
-        from("events")
-        .delete()
-        .eq("ev_id", ev_id);
+        const { error } = await supabase.
+            from("events")
+            .delete()
+            .eq("ev_id", ev_id);
 
         setClub({
             ...club,
@@ -356,42 +368,48 @@ function Events({ isAdmin, club, setClub }) {
     }
 
     async function handleReserveEvent(ev_id, reserved) {
+        console.log(reserved);
         if (!reserved) {
-        const {data, error} = await supabase
-        .from("event_reservations")
-        .insert({
-            user_id: user.id,
-            ev_id
-        }).select().single();
+            const { data, error } = await supabase
+                .from("event_reservations")
+                .insert({
+                    user_id: user.id,
+                    ev_id
+                }).select().single();
 
-        setClub({
-            ...club,
-            events: club.events.map((ev) => 
-            ev.ev_id == ev_id
-            ? { ...ev, event_reservations: [data]}
-            : ev
-        )
-        });
-    } else {
-        const {data, error}  = await supabase
-        .from("event_reservations")
-        .delete()
-        .eq("user_id", user.id)
+            setClub({
+                ...club,
+                events: club.events.map((ev) =>
+                    ev.ev_id == ev_id
+                        ? { ...ev, event_reservations: [...ev.event_reservations, data] }
+                        : ev
+                )
+            });
+        } else {
+            const { data, error } = await supabase
+                .from("event_reservations")
+                .delete()
+                .eq("user_id", user.id)
 
-        setClub({
-            ...club,
-            events: club.events.map((ev) => 
-            ev.ev_id == ev_id
-            ? { ...ev, event_reservations: []}
-            : ev
-        )
-        });
+            setClub({
+                ...club,
+                events: club.events.map((ev) =>
+                    ev.ev_id == ev_id
+                        ? { ...ev, event_reservations: ev.event_reservations.filter(
+                            (e) => e.user_id != user.id)
+                         }
+                        : ev
+                )
+            });
 
-        if (error) console.log(error.message);
 
-    }
+            
 
-        
+            if (error) console.log(error.message);
+
+        }
+
+
     }
 
     return (
@@ -400,7 +418,8 @@ function Events({ isAdmin, club, setClub }) {
                 <div className="text-center text-2xl font-bold p-3">Events</div>
                 <div className="space-y-3">
                     {club.events.map((a) => <Event key={a.ev_id} event={a}
-                        isAdmin={isAdmin} handleDeleteEvent={handleDeleteEvent} handleEditEvent={handleEditEvent} handleReserveEvent={handleReserveEvent} />)}
+                        isAdmin={isAdmin} handleDeleteEvent={handleDeleteEvent} userIdNameMap={userIdNameMap} 
+                        handleEditEvent={handleEditEvent} handleReserveEvent={handleReserveEvent}/>)}
                     {isAdmin &&
                         <div className="flex justify-end">
                             <button className="btn btn-sm btn-primary" onClick={() => setShowModal(true)}>Add Event</button>
@@ -413,12 +432,12 @@ function Events({ isAdmin, club, setClub }) {
                     <form className="w-full flex flex-col space-y-3" onSubmit={handleAddEvent}>
                         <div className="font-bold text-center text-xl">Add Event</div>
                         <label>Event Title</label>
-                        <input type="text" name="title" className="input input-sm input-primary"/>
+                        <input type="text" name="title" className="input input-sm input-primary" />
                         <lable>Event Description</lable>
                         <textarea className="textarea textarea-primary" name="text"></textarea>
                         <label>Event Date & Time</label>
-                        <input type="date" name="date" className="input input-sm input-primary"/>
-                        <input type="time" name="time" className="input input-sm input-primary"/>
+                        <input type="date" name="date" className="input input-sm input-primary" />
+                        <input type="time" name="time" className="input input-sm input-primary" />
                         <button className="btn btn-xs btn-primary">Submit</button>
                     </form>
                 }
@@ -427,17 +446,20 @@ function Events({ isAdmin, club, setClub }) {
     )
 }
 
-function Event({ event, handleEditEvent, handleDeleteEvent, handleReserveEvent, isAdmin }) {
+function Event({ event, handleEditEvent, handleDeleteEvent, handleReserveEvent, isAdmin, userIdNameMap }) {
     let [modalText, setModalText] = useState(null);
+    let [showReserv, setShowReserv] = useState(false);
+    let { user } = useContext(AppContext);
     let date = new Date(event.date);
     let y = date.getFullYear();
     let m = date.getMonth() + 1;
     let d = date.getDate();
-    let t = date.toTimeString().substring(0,5);
-    let p = date.toLocaleTimeString().substring(0,4) +" " + date.toLocaleTimeString().substring (8,11);
+    let t = date.toTimeString().substring(0, 5);
+    let p = date.toLocaleTimeString().substring(0, 4) + " " + date.toLocaleTimeString().substring(8, 11);
+    date = `${y}-${m < 10 ? `0${m}` : m}-${d < 10 ? `0${d}` : d}`;
 
-
-    date = `${y}-${m < 10 ? `0${m}` : m}-${d < 10 ? `0${d}`: d}`;
+    let reserved = event.event_reservations?.find((e) => e.user_id == user.id); 
+    console.log(userIdNameMap);
 
     return (
         <>
@@ -448,30 +470,49 @@ function Event({ event, handleEditEvent, handleDeleteEvent, handleReserveEvent, 
                 </div>
                 <div>{event.text}</div>
                 <div className="flex justify-between items-center">
-                    <button onClick={() => handleReserveEvent(event.ev_id, event.event_reservations?.length > 0)} className={`btn btn-sm ${event.event_reservations?.length > 0 ? "btn-error" : "btn-primary"}`}>
-                        {event.event_reservations?.length > 0 ? "Cancel RSVP" : "RSVP"}
+                    <div className = "flex items-center space-x-2">
+                        
+                    <button onClick={() => handleReserveEvent(event.ev_id, reserved)} className={`btn btn-sm ${reserved ? "btn-error" : "btn-primary"}`}>
+                        {reserved ? "Cancel RSVP" : "RSVP"}
                     </button>
+                    {event.event_reservations?.length > 0 && 
+                        <button onClick={() => setShowReserv(true)}
+                        className="bg-neutral rounded-full w-8 h-8 text-gray-100 flex items-center justify-center font-bold text-sm">
+                            {event.event_reservations?.length}</button>}
+                    </div>
                     <div className="flex items-center space-x-2">
                         <div className="text-xs font-bold">{event.author}</div>
                         {isAdmin && (
                             <div className="space-x-2 ml-2">
-                                <button className="btn btn-xs btn-warning" onClick={() => {setModalText(event.text) }}>Edit</button>
+                                <button className="btn btn-xs btn-warning" onClick={() => { setModalText(event.text) }}>Edit</button>
                                 <button className="btn btn-xs btn-error" onClick={() => handleDeleteEvent(event.ev_id)}>Delete</button>
                             </div>)}
                     </div>
                 </div>
             </div>
+            <Modal show={showReserv} close={() => setShowReserv(false)}>
+                {showReserv && <div>
+                    <div className = "text-xl text-center font-bold">RSVPs</div>
+                    <div className="grid grid-cols-4">
+                        {event.event_reservations?.map((r) => (
+                            <div className="text-center">{userIdNameMap.get(r.user_id)}</div>
+                        ))}
+                    </div>
+                </div>
+
+                }
+            </Modal>
             <Modal show={modalText} close={() => setModalText(null)}>
                 {modalText &&
                     <form className="w-full flex flex-col space-y-3" onSubmit={(ev) => handleEditEvent(ev, () => setModalText(null), event.ev_id)}>
                         <div className="font-bold text-center text-xl">Edit Event</div>
                         <label>Event Title</label>
-                        <input defaultValue={event.title} type="text" name="title" className="input input-sm input-primary"/>
+                        <input defaultValue={event.title} type="text" name="title" className="input input-sm input-primary" />
                         <lable>Event Description</lable>
                         <textarea defaultValue={event.text} className="textarea textarea-primary" name="text"></textarea>
                         <label>Event Date & Time</label>
-                        <input defaultValue={date} type="date" name="date" className="input input-sm input-primary"/>
-                        <input defaultValue={t} type="time" name="time" className="input input-sm input-primary"/>
+                        <input defaultValue={date} type="date" name="date" className="input input-sm input-primary" />
+                        <input defaultValue={t} type="time" name="time" className="input input-sm input-primary" />
                         <button className="btn btn-xs btn-primary">Submit</button>
                     </form>
                 }

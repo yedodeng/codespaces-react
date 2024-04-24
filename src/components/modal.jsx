@@ -4,7 +4,7 @@ export default function Modal({ show, close, children }) {
             className="w-screen h-screen fixed top-0 left-0 flex justify-center items-center duration-300">
             <div onClick={(ev) => ev.stopPropagation()} className="w-4/5 bg-base-100 p-3 rounded relative">
                 {children}
-                <button onClick={close} className="btn btn-error btn-xs absolute right-0 top-0">X</button>
+                <button onClick={close} className="bg-error rounded absolute w-6 right-0 top-0">X</button>
             </div>
         </div>
     )
