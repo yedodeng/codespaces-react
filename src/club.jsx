@@ -4,12 +4,14 @@ import { supabase } from "./supabaseClient";
 import { AppContext } from "./App";
 import Modal from "./components/modal";
 
+const page_size = 3;
+
 export default function Club() {
     let { user } = useContext(AppContext);
     let { club_id } = useParams();
     let [club, setClub] = useState(undefined);
 
-    
+
     useEffect(() => {
         if (club_id) {
             handleLoadClub();
@@ -19,9 +21,9 @@ export default function Club() {
     const userIdNameMap = useMemo(() => {
         let m = new Map();
 
-        for(let i = 0; i < club?.club_memberships.length; i++) {
-            m.set(club.club_memberships[i].user_id, 
-            club.club_memberships[i].profiles.full_name);
+        for (let i = 0; i < club?.club_memberships.length; i++) {
+            m.set(club.club_memberships[i].user_id,
+                club.club_memberships[i].profiles.full_name);
         }
 
         return m;
@@ -37,6 +39,10 @@ export default function Club() {
             .select("*, club_memberships(role, user_id, profiles(full_name, grad_year)), announcements(*), events(*, event_reservations(*))")
             .single()
             .eq("club_id", club_id)
+            .order("created_at", { foreignTable: "announcements", ascending: false })
+            .range(0, page_size - 1, { foreignTable: "announcements" })
+            .order("date", { foreignTable: "events", ascending: true })
+            .range(0, page_size - 1, { foreignTable: "events" });
 
         if (error) alert(club_id);
         setClub(data);
@@ -205,10 +211,34 @@ function Members({ club, role, reload }) {
 
 function Announcements({ isAdmin, club, setClub }) {
     let [showModal, setShowModal] = useState(false);
+    let [page, setPage] = useState(0);
+    let [annCnt, setAnnCnt] = useState(0);
     let { user } = useContext(AppContext);
 
-    let announcements = club.announcements;
-    announcements.sort((a, b) => (a.created_at < b.created_at) ? 1 : -1);
+    useEffect(() => {
+        handleLoadAnnouncementCnt();
+    }, [club])
+
+    useEffect(() => {
+        handleLoadAnnouncements();
+    }, [page])
+
+    async function handleLoadAnnouncementCnt() {
+        const { count, error } = await supabase
+            .from("announcements")
+            .select("*", { count: "exact", head: true })
+            .eq("club_id", club.club_id)
+
+        setAnnCnt(count);
+    }
+
+    async function handleLoadAnnouncements() {
+        const { data, error } = await supabase.from("announcements").select("*")
+            .order("created_at", { ascending: false }).range(page * page_size, page * page_size + page_size - 1);
+
+        setClub({ ...club, announcements: [...club.announcements, ...data] });
+    }
+
     async function handleAddAnnouncement(ev) {
         ev.preventDefault();
         let obj = {
@@ -255,8 +285,14 @@ function Announcements({ isAdmin, club, setClub }) {
             <div>
                 <div className="text-center text-2xl font-bold p-3">Announcements</div>
                 <div className="space-y-3">
-                    {club.announcements.map((a) => <Announcement key={a.ann_id} announcement={a}
+                    {club.announcements.filter(
+                        (_, i) => page * page_size <= i && i <= page * page_size + page_size - 1)
+                    .map((a) => <Announcement key={a.ann_id} announcement={a}
                         isAdmin={isAdmin} handleDeleteAnnouncement={handleDeleteAnnouncement} handleEditAnnouncement={handleEditAnnouncement} />)}
+                    <div className="flex justify-between">
+                        <button onClick={() => setPage(page - 1)} disabled={page == 0} className="btn btn-neutral btn-sm">Prev</button>
+                        <button onClick={() => setPage(page + 1)} disabled={page == Math.ceil(annCnt / page_size) - 1} className="btn btn-neutral btn-sm">Next</button>
+                    </div>
                     {isAdmin &&
                         <div className="flex justify-end">
                             <button className="btn btn-sm btn-primary" onClick={() => setShowModal(true)}>Add Announcement</button>
@@ -311,10 +347,34 @@ function Announcement({ announcement, handleEditAnnouncement, handleDeleteAnnoun
 
 function Events({ isAdmin, club, setClub, userIdNameMap }) {
     let [showModal, setShowModal] = useState(false);
+    let [page, setPage] = useState(0);
+    let [evCnt, setEvCnt] = useState(0);
     let { user } = useContext(AppContext);
 
-    let events = club.events;
-    events.sort((a, b) => (a.date > b.date) ? 1 : -1);
+    useEffect(() => {
+        handleLoadEvCnt();
+    }, [club])
+
+    useEffect(() => {
+        handleLoadEvents();
+    }, [page])
+
+    async function handleLoadEvCnt() {
+        const { count, error } = await supabase
+            .from("events")
+            .select("*", { count: "exact", head: true })
+            .eq("club_id", club.club_id)
+
+        setEvCnt(count);
+    }
+
+    async function handleLoadEvents() {
+        const { data, error } = await supabase.from("events").select("*")
+            .order("created_at", { ascending: false }).range(page * page_size, page * page_size + page_size - 1);
+
+        setClub({ ...club, events: [...club.events, ...data] });
+    }
+
     async function handleAddEvent(ev) {
         ev.preventDefault();
 
@@ -393,15 +453,16 @@ function Events({ isAdmin, club, setClub, userIdNameMap }) {
                 ...club,
                 events: club.events.map((ev) =>
                     ev.ev_id == ev_id
-                        ? { ...ev, event_reservations: ev.event_reservations.filter(
-                            (e) => e.user_id != user.id)
-                         }
+                        ? {
+                            ...ev, event_reservations: ev.event_reservations.filter(
+                                (e) => e.user_id != user.id)
+                        }
                         : ev
                 )
             });
 
 
-            
+
 
             if (error) console.log(error.message);
 
@@ -415,9 +476,15 @@ function Events({ isAdmin, club, setClub, userIdNameMap }) {
             <div>
                 <div className="text-center text-2xl font-bold p-3">Events</div>
                 <div className="space-y-3">
-                    {club.events.map((a) => <Event key={a.ev_id} event={a}
-                        isAdmin={isAdmin} handleDeleteEvent={handleDeleteEvent} userIdNameMap={userIdNameMap} 
-                        handleEditEvent={handleEditEvent} handleReserveEvent={handleReserveEvent}/>)}
+                    {club.events.filter(
+                        (_, i) => page * page_size <= i && i <= page * page_size + page_size - 1)
+                        .map((a) => <Event key={a.ev_id} event={a}
+                        isAdmin={isAdmin} handleDeleteEvent={handleDeleteEvent} userIdNameMap={userIdNameMap}
+                        handleEditEvent={handleEditEvent} handleReserveEvent={handleReserveEvent} />)}
+                    <div className="flex justify-between">
+                        <button onClick={() => setPage(page - 1)} disabled={page == 0} className="btn btn-neutral btn-sm">Prev</button>
+                        <button onClick={() => setPage(page + 1)} disabled={page == Math.ceil(evCnt / page_size) - 1} className="btn btn-neutral btn-sm">Next</button>
+                    </div>
                     {isAdmin &&
                         <div className="flex justify-end">
                             <button className="btn btn-sm btn-primary" onClick={() => setShowModal(true)}>Add Event</button>
@@ -456,8 +523,8 @@ function Event({ event, handleEditEvent, handleDeleteEvent, handleReserveEvent, 
     let p = date.toLocaleTimeString().substring(0, 4) + " " + date.toLocaleTimeString().substring(8, 11);
     date = `${y}-${m < 10 ? `0${m}` : m}-${d < 10 ? `0${d}` : d}`;
 
-    let reserved = event.event_reservations?.find((e) => e.user_id == user.id); 
-    console.log(userIdNameMap);
+    let reserved = event.event_reservations?.find((e) => e.user_id == user.id);
+
 
     return (
         <>
@@ -468,15 +535,15 @@ function Event({ event, handleEditEvent, handleDeleteEvent, handleReserveEvent, 
                 </div>
                 <div>{event.text}</div>
                 <div className="flex justify-between items-center">
-                    <div className = "flex items-center space-x-2">
-                        
-                    <button onClick={() => handleReserveEvent(event.ev_id, reserved)} className={`btn btn-sm ${reserved ? "btn-error" : "btn-primary"}`}>
-                        {reserved ? "Cancel RSVP" : "RSVP"}
-                    </button>
-                    {event.event_reservations?.length > 0 && 
-                        <button onClick={() => setShowReserv(true)}
-                        className="bg-neutral rounded-full w-8 h-8 text-gray-100 flex items-center justify-center font-bold text-sm">
-                            {event.event_reservations?.length}</button>}
+                    <div className="flex items-center space-x-2">
+
+                        <button onClick={() => handleReserveEvent(event.ev_id, reserved)} className={`btn btn-sm ${reserved ? "btn-error" : "btn-primary"}`}>
+                            {reserved ? "Cancel RSVP" : "RSVP"}
+                        </button>
+                        {event.event_reservations?.length > 0 &&
+                            <button onClick={() => setShowReserv(true)}
+                                className="bg-neutral rounded-full w-8 h-8 text-gray-100 flex items-center justify-center font-bold text-sm">
+                                {event.event_reservations?.length}</button>}
                     </div>
                     <div className="flex items-center space-x-2">
                         <div className="text-xs font-bold">{event.author}</div>
@@ -490,7 +557,7 @@ function Event({ event, handleEditEvent, handleDeleteEvent, handleReserveEvent, 
             </div>
             <Modal show={showReserv} close={() => setShowReserv(false)}>
                 {showReserv && <div>
-                    <div className = "text-xl text-center font-bold">RSVPs</div>
+                    <div className="text-xl text-center font-bold">RSVPs</div>
                     <div className="grid grid-cols-4">
                         {event.event_reservations?.map((r) => (
                             <div className="text-center">{userIdNameMap.get(r.user_id)}</div>
