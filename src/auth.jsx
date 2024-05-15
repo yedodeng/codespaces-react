@@ -86,7 +86,6 @@ function SignIn() {
   let [error, setError] = useState(null);
   async function signIn(ev) {
     ev.preventDefault();
-
     setError(null);
     const bol = true;
     let { error } = await supabase.auth.signInWithPassword({

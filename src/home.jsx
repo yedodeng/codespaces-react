@@ -66,7 +66,7 @@ export default function UserHome() {
   
   return (
     <div>
-      <div>Welcome <strong>{user.full_name}!</strong></div>
+      <div className = "mb-2">Welcome <strong>{user.full_name}!</strong></div>
       <div>
         {items.filter((v) => v.club_memberships?.length > 0 || user.roles.is_admin).map((v) => (
           <div className="flex flex-col border-2 p-2 border-secondary w-1/3 mb-4" key={v.club_id}>
@@ -109,7 +109,7 @@ export default function UserHome() {
         }
       </div>
       {!user.roles.is_admin && <button className = "btn" onClick={() => setReveal(!reveal)}>{!reveal ? "Join New Club" : "Cancel"}</button>}
-      {user.roles.is_admin && (<button className="mt-4 btn btn-primary" onClick={handleCreateClub}>Create Club</button>)}
+      {user.roles.is_admin && (<button className="btn btn-primary" onClick={handleCreateClub}>Create Club</button>)}
     </div>
   )
 }

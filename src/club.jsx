@@ -2,6 +2,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom"
 import { supabase } from "./supabaseClient";
 import { AppContext } from "./App";
+import { Link } from "react-router-dom";
 import Modal from "./components/modal";
 
 const page_size = 3;
@@ -10,7 +11,6 @@ export default function Club() {
     let { user } = useContext(AppContext);
     let { club_id } = useParams();
     let [club, setClub] = useState(undefined);
-
 
     useEffect(() => {
         if (club_id) {
@@ -131,12 +131,6 @@ function Members({ club, role, reload }) {
             .eq("club_id", club.club_id)
             .eq("user_id", user_id)
         console.log("yes");
-        // setClub({
-        // ...club, 
-        // club_memberships: club.club_memberships.map((m) =>
-        // m.user_id == user_id ? {...m, role : role} : m
-        // )
-        // })
         reload();
     }
 
@@ -163,7 +157,7 @@ function Members({ club, role, reload }) {
                     {club ? club.club_memberships.filter((m) => m.role != "Pending" || role == "Admin").map((mem, i) => (
                         <tr key={mem.user_id}>
                             <th>{i + 1}</th>
-                            <td>{mem.profiles.full_name}</td>
+                            <td><Link to={`/profile/${mem.user_id}`}>{mem.profiles.full_name}</Link></td>
                             <td>{mem.profiles.grad_year}</td>
                             <td>
                                 {role == "Admin" ?

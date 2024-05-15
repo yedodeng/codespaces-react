@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import App, { AppContext } from "./App";
+import { AppContext } from "./App";
 import { supabase } from "./supabaseClient";
 
 export default function Profile() {
