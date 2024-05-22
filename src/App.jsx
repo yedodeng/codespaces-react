@@ -1,12 +1,11 @@
-import { useEffect, useState, createContext, useContext } from "react";
-import { supabase } from "./supabaseClient";
-import Auth from "./auth";
-import UserHome from "./home";
-import { Routes, Route, Outlet, Link } from "react-router-dom";
+import { createContext, useContext, useEffect, useState } from "react";
+import { Link, Outlet, Route, Routes } from "react-router-dom";
 import About from "./about";
+import Auth from "./auth";
 import Club from "./club";
 import Profile from "./profiles";
-import Modal from "./components/modal";
+import { supabase } from "./supabaseClient";
+import UserHome from "./pages/userhome";
 
 export const AppContext = createContext(null);
 
@@ -29,11 +28,6 @@ export default function App() {
       }
     })
   }, [])
-
-
-  async function signOut() {
-    supabase.auth.signOut();
-  }
 
   return (
     <div>

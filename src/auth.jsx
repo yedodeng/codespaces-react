@@ -8,7 +8,7 @@ export default function Auth() {
       <div className="divider divider-primary"></div>
       <SignIn />
     </div>
-  )
+  );
 }
 
 function SignUp() {
@@ -16,7 +16,7 @@ function SignUp() {
 
   async function signUp(ev) {
     ev.preventDefault();
-    setError(null)
+    setError(null);
     const data = {
       email: ev.target["email"].value,
       password: ev.target["password"].value,
@@ -28,58 +28,71 @@ function SignUp() {
       },
     };
     let { error } = await supabase.auth.signUp(data);
-
     if (error) setError(error.message);
   }
 
   return (
-    <div className="text-center text-xl mb-2"> Sign Up
+    <div className="text-center text-xl mb-2">
+      {" "}
+      Sign Up
       <form className="flex flex-col items-center space-y-2" onSubmit={signUp}>
         <label className="form-control w-full max-w-xs">
           <div className="label">
             <span className="label-text">E-Mail</span>
           </div>
-          <input type="email" name="email" placeholder="name@domain.com" className="input input-bordered w-full max-w-xs" />
-          <div className="label">
-          </div>
+          <input
+            type="email"
+            name="email"
+            placeholder="name@domain.com"
+            className="input input-bordered w-full max-w-xs"
+          />
+          <div className="label"></div>
         </label>
         <label className="form-control w-full max-w-xs">
           <div className="label">
             <span className="label-text">Password</span>
           </div>
-          <input type="password" name="password" placeholder="" className="input input-bordered w-full max-w-xs" />
-          <div className="label">
-          </div>
+          <input
+            type="password"
+            name="password"
+            placeholder=""
+            className="input input-bordered w-full max-w-xs"
+          />
+          <div className="label"></div>
         </label>
         <label className="form-control w-full max-w-xs">
           <div className="label">
             <span className="label-text">Full Name</span>
           </div>
-          <input type="text" name="full_name" placeholder="John Doe" className="input input-bordered w-full max-w-xs" />
-          <div className="label">
-          </div>
+          <input
+            type="text"
+            name="full_name"
+            placeholder="John Doe"
+            className="input input-bordered w-full max-w-xs"
+          />
+          <div className="label"></div>
         </label>
         <label className="form-control w-full max-w-xs">
           <div className="label">
             <span className="label-text">Grade</span>
           </div>
-          <select className="select select-bordered w-full max-w-xs" name="grad_year">
-            <option defaultValue="2027">Freshman</option>
-            <option value="2026">Sophmore</option>
-            <option value="2025">Junior</option>
-            <option value="2024">Senior</option>
+          <select
+            className="select select-bordered w-full max-w-xs"
+            name="grad_year"
+            defaultValue="2027"
+          >
+            {[0, 1, 2, 3, 4].map((v) => (
+              <option key={v}>{new Date().getFullYear() - v}</option>
+            ))}
             <option value="1">N/A</option>
           </select>
-          <div className="label">
-          </div>
+          <div className="label"></div>
         </label>
-        <button className="btn btn-sm btn-primary">
-          Sign Up
-        </button>
+        <button className="btn btn-sm btn-primary">Sign Up</button>
       </form>
       {error && <div className="text-error text-center mt-2">{error}</div>}
     </div>
-  )
+  );
 }
 
 function SignIn() {
@@ -87,39 +100,47 @@ function SignIn() {
   async function signIn(ev) {
     ev.preventDefault();
     setError(null);
-    const bol = true;
+    const bol = false;
     let { error } = await supabase.auth.signInWithPassword({
       email: ev.target.email.value,
       password: bol ? "yedoyedo" : ev.target.password.value,
-    })
+    });
     if (error) console.log(error.message);
     if (error) setError(error.message);
   }
 
   return (
-    <div className="text-center text-xl mb-2"> Sign In
+    <div className="text-center text-xl mb-2">
+      {" "}
+      Sign In
       <form className="flex flex-col items-center space-y-2" onSubmit={signIn}>
         <label className="form-control w-full max-w-xs">
           <div className="label">
             <span className="label-text">E-Mail</span>
           </div>
-          <input type="email" name="email" placeholder="name@domain.com" className="input input-bordered w-full max-w-xs" />
-          <div className="label">
-          </div>
+          <input
+            type="email"
+            name="email"
+            placeholder="name@domain.com"
+            className="input input-bordered w-full max-w-xs"
+          />
+          <div className="label"></div>
         </label>
         <label className="form-control w-full max-w-xs">
           <div className="label">
             <span className="label-text">Password</span>
           </div>
-          <input type="password" name="password" placeholder="" className="input input-bordered w-full max-w-xs" />
-          <div className="label">
-          </div>
+          <input
+            type="password"
+            name="password"
+            placeholder=""
+            className="input input-bordered w-full max-w-xs"
+          />
+          <div className="label"></div>
         </label>
-        <button className="btn btn-sm btn-primary">
-          Sign In
-        </button>
+        <button className="btn btn-sm btn-primary">Sign In</button>
       </form>
       {error && <div className="text-error text-center m-2">{error}</div>}
     </div>
-  )
+  );
 }
