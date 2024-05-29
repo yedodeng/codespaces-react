@@ -11,15 +11,16 @@ export default function useClubs() {
   //   read();
   // }, []);
 
-  async function loadClubs({ page = 1, page_size = 2, myClubOnly = false }) {
-    let item = myClubOnly
+  async function loadClubs({ page = 1, page_size = 2, myClubs }) {
+    let item = myClubs
       ? await supabase
           .from("clubs")
           .select("*, club_memberships!inner(*)")
           .eq("club_memberships.user_id", user.id)
-      : await supabase.from("clubs").select("*");
+      : await supabase.from("clubs")
+      .select("*, club_memberships!inner(*)")
+      .neq("club_memberships.user_id", user.id)
 
-    console.log(item.data);
     setItems(item.data);
   }
 

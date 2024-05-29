@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"    
 import { supabase } from "./supabaseClient";
 import { AppContext } from "./App";
 import { Link } from "react-router-dom";

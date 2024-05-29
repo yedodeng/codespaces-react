@@ -1,5 +1,10 @@
 export default function About() {
+    let user = [];
+    for (let i = 0; i < N; i++) {
+        user[i]
+    }
+
     return (
-        <div>We are a devoted team ready to serve any of your needs. Please contact us at: </div>
+        <div></div>
     )
 }
