@@ -1,27 +1,30 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../App";
 import { supabase } from "../supabaseClient";
 
-export default function useClubs() {
+export default function useClubs({ pageSize = 2, myOwn = false }) {
   let { user } = useContext(AppContext);
-  let [items, setItems] = useState([]);
+  let [allClubs, setAllClubs] = useState([]);
+  let [page, setPage] = useState(1);
 
-  // useEffect(() => {
-  //   console.log("useClubs loading...");
-  //   read();
-  // }, []);
+  useEffect(() => {
+    loadAllClubs();
+  }, []);
 
-  async function loadClubs({ page = 1, page_size = 2, myClubs }) {
-    let item = myClubs
-      ? await supabase
-          .from("clubs")
-          .select("*, club_memberships!inner(*)")
-          .eq("club_memberships.user_id", user.id)
-      : await supabase.from("clubs")
-      .select("*, club_memberships!inner(*)")
-      .neq("club_memberships.user_id", user.id)
+  let clubs = allClubs.slice((page - 1) * pageSize, page * pageSize);
+  let numPages = Math.ceil((allClubs.length + 1) / pageSize);
 
-    setItems(item.data);
+  async function loadAllClubs() {
+    let item = await supabase
+      .from("clubs")
+      .select("*, club_memberships(*)");
+    // .eq("club_memberships.user_id", user.id);
+
+    console.log("num clubs", item.data.length);
+    setAllClubs(item.data);
+
+    // setMyClubs(item.data.filter((c) => c.club_memberships.length === 1));
+    // setAllClubs(item.data.filter((c) => c.club_memberships.length !== 1));
   }
 
   async function handleCreateClub() {
@@ -72,11 +75,13 @@ export default function useClubs() {
   }
 
   return {
-    items,
     handleCreateClub,
     handleUpdateClub,
     handleDeleteClub,
     handleJoinClub,
-    loadClubs,
+    clubs,
+    page,
+    setPage,
+    numPages,
   };
 }

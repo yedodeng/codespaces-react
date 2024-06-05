@@ -6,6 +6,7 @@ import Club from "./club";
 import Profile from "./profiles";
 import { supabase } from "./supabaseClient";
 import UserHome from "./pages/userhome";
+import QueryTest from "./pages/query";
 
 export const AppContext = createContext(null);
 
@@ -36,13 +37,14 @@ export default function App() {
           <Route path="/" element={<Layout />}>
             <Route path="/" element={<UserHome />}></Route>
             <Route path="/about" element={<About />}></Route>
+            <Route path="/query" element={<QueryTest />}></Route>
             <Route path="/club/:club_id" element={<Club />}></Route>
             <Route path="/profile/:user_id" element={<Profile />}></Route>
           </Route>
         </Routes>
       </AppContext.Provider>
     </div>
-  )
+  );
 }
 
 function Layout() {
@@ -56,22 +58,27 @@ function Layout() {
         <div className="text-xl font-bold">
           <Link to="/">Home</Link>
         </div>
+        <div className="text-xl font-bold">
+          <Link to="/query">Q</Link>
+        </div>
         <div className="text-xl font-bold flex-grow">
           <Link to="/about">About Us</Link>
         </div>
         {user && (
-          <div className = "flex items-center space-x-2">
-            <div className = "text-xl font-bold">
+          <div className="flex items-center space-x-2">
+            <div className="text-xl font-bold">
               <Link to={`/profile/${user.id}`}>{user.full_name}</Link>
             </div>
             <button onClick={signOut} className="btn btn-error btn-small">
               Sign Out
             </button>
-          </div>)
-        }
+          </div>
+        )}
       </div>
-      <div className="flex-grow bg-white p-5">{user ? <Outlet /> : <Auth />}</div>
+      <div className="flex-grow bg-white p-5">
+        {user ? <Outlet /> : <Auth />}
+      </div>
     </div>
-  )
+  );
 }
 
