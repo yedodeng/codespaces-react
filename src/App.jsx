@@ -2,21 +2,27 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { Link, Outlet, Route, Routes } from "react-router-dom";
 import About from "./about";
 import Auth from "./auth";
-import Club from "./club";
+import Club from "./pages/club/club";
+import AllClubsPage from "./pages/allClubs";
+import MyClubsPage from "./pages/myClubs";
+import QueryTest from "./pages/query";
+import UserHome from "./pages/userhome";
 import Profile from "./profiles";
 import { supabase } from "./supabaseClient";
-import UserHome from "./pages/userhome";
-import QueryTest from "./pages/query";
+import ClubAdmin from "./pages/club/admin/club-admin";
 
 export const AppContext = createContext(null);
 
 export default function App() {
   let [user, setUser] = useState(undefined);
   const loadUserData = async (userId) => {
-    const { data } = await supabase.from("profiles").select("*, roles(*)").eq("id", userId).single();
+    const { data } = await supabase
+      .from("profiles")
+      .select("*, roles(*)")
+      .eq("id", userId)
+      .single();
     setUser(data);
   };
-
 
   useEffect(() => {
     supabase.auth.onAuthStateChange((_event, session) => {
@@ -25,10 +31,10 @@ export default function App() {
         loadUserData(session.user.id);
       } else {
         // signed out
-        setUser(undefined)
+        setUser(undefined);
       }
-    })
-  }, [])
+    });
+  }, []);
 
   return (
     <div>
@@ -36,9 +42,12 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route path="/" element={<UserHome />}></Route>
+            <Route path="/my-clubs" element={<MyClubsPage />}></Route>
+            <Route path="/all-clubs" element={<AllClubsPage />}></Route>
             <Route path="/about" element={<About />}></Route>
             <Route path="/query" element={<QueryTest />}></Route>
             <Route path="/club/:club_id" element={<Club />}></Route>
+            <Route path="/club/:club_id/admin" element={<ClubAdmin />}></Route>
             <Route path="/profile/:user_id" element={<Profile />}></Route>
           </Route>
         </Routes>
@@ -59,10 +68,17 @@ function Layout() {
           <Link to="/">Home</Link>
         </div>
         <div className="text-xl font-bold">
-          <Link to="/query">Q</Link>
+          <Link to="/my-clubs">My Clubs</Link>
         </div>
+        <div className="text-xl font-bold">
+          <Link to="/all-clubs">Explore</Link>
+        </div>
+
         <div className="text-xl font-bold flex-grow">
           <Link to="/about">About Us</Link>
+        </div>
+        <div className="text-xl font-bold">
+          <Link to="/query">Q</Link>
         </div>
         {user && (
           <div className="flex items-center space-x-2">
@@ -81,4 +97,3 @@ function Layout() {
     </div>
   );
 }
-
