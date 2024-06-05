@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../App";
 import { supabase } from "../supabaseClient";
 
-export default function useClubs({ pageSize = 2, myOwn = false }) {
+export default function useClubs({ pageSize = 2, myClubsOnly = false }) {
   let { user } = useContext(AppContext);
   let [allClubs, setAllClubs] = useState([]);
   let [page, setPage] = useState(1);
@@ -15,10 +15,15 @@ export default function useClubs({ pageSize = 2, myOwn = false }) {
   let numPages = Math.ceil((allClubs.length + 1) / pageSize);
 
   async function loadAllClubs() {
-    let item = await supabase
-      .from("clubs")
-      .select("*, club_memberships(*)");
-    // .eq("club_memberships.user_id", user.id);
+    let item = myClubsOnly
+      ? await supabase
+          .from("clubs")
+          .select("*, club_memberships!inner(*)")
+          .eq("club_memberships.user_id", user.id)
+      : await supabase
+          .from("clubs")
+          .select("*, club_memberships(*)")
+          .eq("club_memberships.user_id", user.id);
 
     console.log("num clubs", item.data.length);
     setAllClubs(item.data);

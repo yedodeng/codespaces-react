@@ -1,6 +1,6 @@
-import ClubList from "../../components/club-list";
+import ClubList from "../components/club-list";
 
-export default function UserHome() {
+export default function MyClubsPage() {
   return (
     <div>
       <h1>My Clubs</h1>
@@ -8,4 +8,3 @@ export default function UserHome() {
     </div>
   );
 }
-
