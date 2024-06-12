@@ -1,24 +1,38 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { supabase } from "../../../supabaseClient";
-import { json, useParams, useSearchParams } from "react-router-dom";
+import ManageDesc from "./manage-desc";
+import ManageName from "./manage-title";
+import ManageMembers from "./manage-members";
+import ManageAnns from "./manage-anns";
 
 export default function ClubAdmin() {
   let { club_id } = useParams();
 
   return (
     <div>
-      <MemberManage club_id={club_id} />
+      <ManageName club_id={club_id} />
+      <div className = "my-4"></div>
+      <ManageDesc club_id={club_id} />
+      <div className = "my-4"></div>
+      <ManageMembers club_id={club_id} />
+      <div className = "my-4"></div>
+      {/* <ManageAnns club_id={club_id}></ManageAnns> */}
     </div>
   );
 }
 
-function MemberManage({ club_id }) {
-  const { members, setMembers } = useClubAdmin({ club_id });
+
+
+
+
+function ManageMember({ club_id }) {
+  const { members, setMembers } = useMembers({ club_id });
 
   return <div className="p-4 bg-slate-600">{JSON.stringify(members)}</div>;
 }
 
-function useClubAdmin({ club_id }) {
+function useMembers({ club_id }) {
   let [members, setMembers] = useState([]);
 
   useEffect(() => {
