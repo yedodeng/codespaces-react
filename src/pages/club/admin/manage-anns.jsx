@@ -1,24 +1,20 @@
-import { useEffect, useState, useTransition } from "react";
-import { supabase } from "../../../supabaseClient";
+import { useState } from "react";
 import Modal from "../../../components/modal";
+import useAnns from "../../../hooks/useAnns";
 
 export default function ManageAnns({ club_id }) {
-  let [showModal, setShowModal] = useState(false);
-  let [page, setPage] = useState(0);
+  const page_size = 3;
 
-  const { anns, annCnt, handleLoadAnnouncementCnt, handleLoadAnnouncements,
-          handleAddAnnouncement, handleEditAnnouncement, handleDeleteAnnouncement
-   } = useAnns({ club_id });
+  let { anns, annCnt, handleAddAnnouncement, handleEditAnnouncement, 
+    handleDeleteAnnouncement, page, setPage, showModal, setShowModal
+   } = useAnns({ club_id, page_size});
 
-
-  console.log(anns);
   return (
     <>
       <div>
         <div className="text-center text-2xl font-bold p-3">Announcements</div>
         <div className="space-y-3">
-          {anns
-            .filter(
+          {anns?.filter(
               (_, i) =>
                 page * page_size <= i && i <= page * page_size + page_size - 1
             )
@@ -26,7 +22,6 @@ export default function ManageAnns({ club_id }) {
               <Announcement
                 key={a.ann_id}
                 announcement={a}
-                isAdmin={isAdmin}
                 handleDeleteAnnouncement={handleDeleteAnnouncement}
                 handleEditAnnouncement={handleEditAnnouncement}
               />
@@ -47,7 +42,6 @@ export default function ManageAnns({ club_id }) {
               Next
             </button>
           </div>
-          {isAdmin && (
             <div className="flex justify-end">
               <button
                 className="btn btn-sm btn-primary"
@@ -56,7 +50,6 @@ export default function ManageAnns({ club_id }) {
                 Add Announcement
               </button>
             </div>
-          )}
         </div>
       </div>
       <Modal show={showModal} close={() => setShowModal(false)}>
@@ -80,86 +73,11 @@ export default function ManageAnns({ club_id }) {
   );
 }
 
-function useAnns({ club_id }) {
-  let [anns, setAnns] = useState();
-  let [annCnt, setAnnCnt] = useState(0);
-
-  useEffect(() => {
-    if (club_id) handleLoadAnnouncements();
-  }, [club_id]);
-
-  async function handleLoadAnnouncementCnt() {
-    const { count, error } = await supabase
-      .from("announcements")
-      .select("*", { count: "exact", head: true })
-      .eq("club_id", club.club_id);
-
-    setAnnCnt(count);
-  }
-
-  async function handleLoadAnnouncements() {
-    const { data, error } = await supabase
-      .from("announcements")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .range(page * page_size, page * page_size + page_size - 1);
-    
-    console.log([...anns, ...data]);
-
-    setAnns([...anns, ...data]);
-  }
-
-  async function handleAddAnnouncement(ev) {
-    ev.preventDefault();
-    let obj = {
-      club_id: club.club_id,
-      text: ev.target.text.value,
-      author: user.full_name,
-    };
-    const { data, error } = await supabase
-      .from("announcements")
-      .insert(obj)
-      .select()
-      .single();
-
-    setAnns([...anns, data]);
-    setShowModal(false);
-  }
-
-  async function handleEditAnnouncement(ev, close, ann_id) {
-    ev.preventDefault();
-
-    const { error } = await supabase
-      .from("announcements")
-      .update({ text: ev.target.text.value })
-      .eq("ann_id", ann_id);
-
-    setAnns(
-      anns.map((a) =>
-        a.ann_id == ann_id ? { ...a, text: ev.target.text.value } : a
-      ),
-    );
-  }
-
-  async function handleDeleteAnnouncement(ann_id) {
-    const { error } = await supabase
-      .from("announcements")
-      .delete()
-      .eq("ann_id", ann_id);
-
-    setAnns(anns.filter((a) => a.ann_id != ann_id),);
-  }
-
-  return { anns, handleLoadAnnouncementCnt, annCnt,
-    handleLoadAnnouncements, handleAddAnnouncement, 
-    handleEditAnnouncement, handleDeleteAnnouncement};
-}
 
 function Announcement({
   announcement,
   handleEditAnnouncement,
-  handleDeleteAnnouncement,
-  isAdmin,
+  handleDeleteAnnouncement
 }) {
   let [modalText, setModalText] = useState(null);
 
@@ -173,7 +91,6 @@ function Announcement({
           </div>
           <div className="flex items-center space-x-2">
             <div className="text-xs font-bold">{announcement.author}</div>
-            {isAdmin && (
               <div className="space-x-2 ml-2">
                 <button
                   className="btn btn-xs btn-warning"
@@ -190,7 +107,6 @@ function Announcement({
                   Delete
                 </button>
               </div>
-            )}
           </div>
         </div>
       </div>

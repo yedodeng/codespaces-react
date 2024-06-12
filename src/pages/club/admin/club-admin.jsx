@@ -5,6 +5,7 @@ import ManageDesc from "./manage-desc";
 import ManageName from "./manage-title";
 import ManageMembers from "./manage-members";
 import ManageAnns from "./manage-anns";
+import ManageEvents from "./manage-events";
 
 export default function ClubAdmin() {
   let { club_id } = useParams();
@@ -17,7 +18,9 @@ export default function ClubAdmin() {
       <div className = "my-4"></div>
       <ManageMembers club_id={club_id} />
       <div className = "my-4"></div>
-      {/* <ManageAnns club_id={club_id}></ManageAnns> */}
+      <ManageAnns club_id={club_id}></ManageAnns>
+      <div className = "my-4"></div>
+      {/* <ManageEvents club_id={club_id}></ManageEvents> */}
     </div>
   );
 }

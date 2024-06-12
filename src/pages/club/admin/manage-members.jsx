@@ -106,6 +106,7 @@ function useMembers({ club_id }) {
             .select("*, profiles(grad_year, full_name)")
             .eq("club_id", club_id)
             .limit(10);
+
         setMembers(data);
     }
 
