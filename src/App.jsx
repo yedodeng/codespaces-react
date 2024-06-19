@@ -61,8 +61,10 @@ function Layout() {
   async function signOut() {
     supabase.auth.signOut();
   }
+  if (true) {
   return (
     <div className="min-h-screen flex flex-col">
+      {user ? (
       <div className="flex items-center border-primary border-b p-5 space-x-5">
         <div className="text-xl font-bold">
           <Link to="/">Home</Link>
@@ -80,7 +82,6 @@ function Layout() {
         <div className="text-xl font-bold">
           <Link to="/query">Q</Link>
         </div>
-        {user && (
           <div className="flex items-center space-x-2">
             <div className="text-xl font-bold">
               <Link to={`/profile/${user.id}`}>{user.full_name}</Link>
@@ -89,11 +90,13 @@ function Layout() {
               Sign Out
             </button>
           </div>
-        )}
       </div>
+    ) : <></>}
       <div className="flex-grow bg-white p-5">
         {user ? <Outlet /> : <Auth />}
       </div>
     </div>
   );
+} 
+
 }

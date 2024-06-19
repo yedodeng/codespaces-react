@@ -3,11 +3,11 @@ import { supabase } from "../supabaseClient";
 import { AppContext } from "../App";
 
 export default function useAnns({ club_id, page_size }) {
-    let { user } = useContext(AppContext);
     let [anns, setAnns] = useState([]);
     let [annCnt, setAnnCnt] = useState(0);
     let [page, setPage] = useState(0);
     let [showModal, setShowModal] = useState(false);
+    let {user} = useContext(AppContext);
 
     useEffect(() => {
       if (club_id) handleLoadAnnouncements();
