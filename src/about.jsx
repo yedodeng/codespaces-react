@@ -1,10 +1,6 @@
 export default function About() {
-    // let user = [];
-    // for (let i = 0; i < N; i++) {
-    //     user[i]
-    // }
 
     return (
-        <div>123</div>
+        <div>This is a great tale about clubs and their influency on the humanity of man.</div>
     )
 }

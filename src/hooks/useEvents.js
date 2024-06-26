@@ -41,7 +41,7 @@ export default function useEvents({ club_id, page_size }) {
 
         let date = new Date(`${ev.target.date.value} ${ev.target.time.value}`);
         let obj = {
-            club_id: club.club_id,
+            club_id: club_id,
             text: ev.target.text.value,
             author: user.full_name,
             title: ev.target.title.value,

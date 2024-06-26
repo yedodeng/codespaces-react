@@ -39,7 +39,7 @@ export default function Event({
                             onClick={() => setShowReserv(true)}
                             className="bg-neutral rounded-full w-8 h-8 text-gray-100 flex items-center justify-center font-bold text-sm"
                         >
-                            {event.event_reservations?.length}
+                            {event.event_reservations ? event.event_reservations.length : 0}
                         </button>) : <button
                             onClick={() => handleReserveEvent(event.ev_id, reserved, user.id)}
                             className={`btn btn-sm ${reserved ? "btn-error" : "btn-primary"}`}

@@ -2,13 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../../supabaseClient";
 
 export default function ManageName({ club_id }) {
-
     const { name, handleUpdateName } = useName({ club_id });
   
     let [editName, setEditName] = useState(false);
     let [newName, setNewName] = useState("");
     let [oldName, setOldName] = useState("");
-  
     
     useEffect(() => {
       setNewName(name);
@@ -56,7 +54,6 @@ export default function ManageName({ club_id }) {
             </>
           )}
         </div>
-  
       </div>
     );
   }
@@ -84,7 +81,6 @@ export default function ManageName({ club_id }) {
         .eq("club_id", club_id);
       setName(newName);
     }
-  
   
     return {name, handleUpdateName};
   }

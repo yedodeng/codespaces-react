@@ -6,10 +6,10 @@ import PageBtns from "../../../components/pagebtns";
 
 export default function ManageEvents({ club_id }) {
     const page_size = 3;
-    let {events, evCnt, page, setPage, handleAddEvent,  
+    let { events, evCnt, page, setPage, handleAddEvent,
         handleEditEvent, handleDeleteEvent, showModal,
-        setShowModal, } = useEvents({club_id, page_size});
-    let userIdNameMap = useUserIdNameMap({club_id});
+        setShowModal, } = useEvents({ club_id, page_size });
+    let userIdNameMap = useUserIdNameMap({ club_id });
 
     return (
         <>
@@ -17,10 +17,7 @@ export default function ManageEvents({ club_id }) {
                 <div className="text-center text-2xl font-bold p-3">Events</div>
                 <div className="space-y-3">
                     {events
-                        .filter(
-                            (_, i) =>
-                                page * page_size <= i && i <= page * page_size + page_size - 1
-                        )
+                        .filter((_, i) => page * page_size <= i && i <= page * page_size + page_size - 1)
                         .map((a) => (
                             <Event
                                 key={a.ev_id}
@@ -31,15 +28,15 @@ export default function ManageEvents({ club_id }) {
                                 isAdmin={true}
                             />
                         ))}
-                    <PageBtns cnt={evCnt} page = {page} setPage={setPage} page_size={page_size}></PageBtns>
-                        <div className="flex justify-end">
-                            <button
-                                className="btn btn-sm btn-primary"
-                                onClick={() => setShowModal(true)}
-                            >
-                                Add Event
-                            </button>
-                        </div>
+                    <PageBtns cnt={evCnt} page={page} setPage={setPage} page_size={page_size}></PageBtns>
+                    <div className="flex justify-end">
+                        <button
+                            className="btn btn-sm btn-primary"
+                            onClick={() => setShowModal(true)}
+                        >
+                            Add Event
+                        </button>
+                    </div>
                 </div>
             </div>
             <Modal show={showModal} close={() => setShowModal(false)}>
@@ -71,7 +68,9 @@ export default function ManageEvents({ club_id }) {
                             name="time"
                             className="input input-sm input-primary"
                         />
-                        <button className="btn btn-xs btn-primary">Submit</button>
+                        <div className="flex justify-center">
+                            <button className="btn btn-sm font-bold w-1/3 btn-primary">Submit</button>
+                        </div>
                     </form>
                 )}
             </Modal>

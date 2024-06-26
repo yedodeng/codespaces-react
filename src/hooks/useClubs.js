@@ -45,8 +45,6 @@ export default function useClubs({ page_size = 3, myClubsOnly = false }) {
     setClubCnt(count);
   }
 
-  
-
   async function handleCreateClub() {
     const name = prompt("Enter club name:");
     if (name) {

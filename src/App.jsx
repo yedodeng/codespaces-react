@@ -81,7 +81,7 @@ function Layout() {
             <div className="text-xl font-bold">
               <Link to={`/profile/${user.id}`}>{user.full_name}</Link>
             </div>
-            <button onClick={signOut} className="btn btn-error btn-small">
+            <button onClick={signOut} className="btn font-bold text-lg btn-error btn-small">
               Sign Out
             </button>
           </div>
