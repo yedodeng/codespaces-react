@@ -3,8 +3,7 @@ import { Link, Outlet, Route, Routes } from "react-router-dom";
 import About from "./about";
 import Auth from "./auth";
 import Club from "./pages/club/club";
-import AllClubsPage from "./pages/allClubs";
-import MyClubsPage from "./pages/myClubs";
+import AllClubsPage from "./pages/explore";
 import QueryTest from "./pages/query";
 import UserHome from "./pages/userhome";
 import Profile from "./profiles";
@@ -42,7 +41,6 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route path="/" element={<UserHome />}></Route>
-            <Route path="/my-clubs" element={<MyClubsPage />}></Route>
             <Route path="/all-clubs" element={<AllClubsPage />}></Route>
             <Route path="/about" element={<About />}></Route>
             <Route path="/query" element={<QueryTest />}></Route>
@@ -68,9 +66,6 @@ function Layout() {
       <div className="flex items-center border-primary border-b p-5 space-x-5">
         <div className="text-xl font-bold">
           <Link to="/">Home</Link>
-        </div>
-        <div className="text-xl font-bold">
-          <Link to="/my-clubs">My Clubs</Link>
         </div>
         <div className="text-xl font-bold">
           <Link to="/all-clubs">Explore</Link>

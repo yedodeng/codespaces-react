@@ -2,13 +2,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../../supabaseClient";
 
 export default function ManageDesc({ club_id }) {
-
     const { desc, handleUpdateDesc } = useDesc({ club_id });
-  
     let [editDesc, setEditDesc] = useState(false);
     let [newDesc, setNewDesc] = useState("");
     let [oldDesc, setOldDesc] = useState("");
-    
     
     useEffect(() => {
       setNewDesc(desc);
@@ -84,7 +81,6 @@ export default function ManageDesc({ club_id }) {
         .eq("club_id", club_id);
       setDesc(newDesc);
     }
-  
   
     return {desc, handleUpdateDesc};
   }

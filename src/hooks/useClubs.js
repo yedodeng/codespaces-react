@@ -2,35 +2,50 @@ import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../App";
 import { supabase } from "../supabaseClient";
 
-export default function useClubs({ pageSize = 2, myClubsOnly = false }) {
+export default function useClubs({ page_size = 3, myClubsOnly = false }) {
   let { user } = useContext(AppContext);
-  let [allClubs, setAllClubs] = useState([]);
-  let [page, setPage] = useState(1);
+  let [clubs, setClubs] = useState([]);
+  let [page, setPage] = useState(0);
+  let [clubCnt, setClubCnt] = useState(0);
 
   useEffect(() => {
-    loadAllClubs();
+    loadClubs();
+  }, [page]);
+
+  useEffect(() => {
+    loadClubCnt();
   }, []);
 
-  let clubs = allClubs.slice((page - 1) * pageSize, page * pageSize);
-  let numPages = Math.ceil((allClubs.length + 1) / pageSize);
-
-  async function loadAllClubs() {
-    let item = myClubsOnly
+  async function loadClubs() {
+    const {data} = myClubsOnly
       ? await supabase
           .from("clubs")
           .select("*, club_memberships!inner(*)")
           .eq("club_memberships.user_id", user.id)
+          .range(page * page_size, page * page_size + page_size - 1)
       : await supabase
           .from("clubs")
           .select("*, club_memberships(*)")
-          .eq("club_memberships.user_id", user.id);
+          .eq("club_memberships.user_id", user.id)
+          .range(page * page_size, page * page_size + page_size - 1);
 
-    console.log("num clubs", item.data.length);
-    setAllClubs(item.data);
-
-    // setMyClubs(item.data.filter((c) => c.club_memberships.length === 1));
-    // setAllClubs(item.data.filter((c) => c.club_memberships.length !== 1));
+    setClubs([...clubs, ...data]);
   }
+
+  async function loadClubCnt() {
+    const { count  } = myClubsOnly ?
+     await supabase
+    .from("clubs")
+    .select("*, club_memberships!inner(*)", { count: "exact", head: true })
+    .eq("club_memberships.user_id", user.id) 
+    : await supabase
+    .from("clubs")
+    .select("*, club_memberships(*)", { count: "exact", head: true })
+    .eq("club_memberships.user_id", user.id)
+    setClubCnt(count);
+  }
+
+  
 
   async function handleCreateClub() {
     const name = prompt("Enter club name:");
@@ -87,6 +102,7 @@ export default function useClubs({ pageSize = 2, myClubsOnly = false }) {
     clubs,
     page,
     setPage,
-    numPages,
+    page_size,
+    clubCnt
   };
 }

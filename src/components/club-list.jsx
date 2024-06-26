@@ -1,23 +1,26 @@
 import { Link } from "react-router-dom";
 import useClubs from "../hooks/useClubs";
+import PageBtns from "./pagebtns";
 
 export default function ClubList({ myClubsOnly }) {
-  let { clubs, page, setPage, numPages } = useClubs({ myClubsOnly });
+  let { clubs, page, setPage, page_size, clubCnt } = useClubs({ myClubsOnly });
 
   return (
-    <div>
-      <div>
-        {clubs.map((v) => (
+    <>
+      <div className = "flex flex-col items-center">
+        {clubs.filter(
+              (_, i) =>
+                page * page_size <= i && i <= page * page_size + page_size - 1
+            ).map((v) => (
           <div
-            className="flex flex-col border-2 p-2 border-secondary w-1/3 mb-4"
+            className="flex flex-col border-2 p-2 border-secondary w-2/3 mb-4"
             key={v.club_id}
           >
-            <Link to={`/club/${v.club_id}`} className="text-xl mb-2">
+            <Link to={`/club/${v.club_id}`} className="text-2xl mb-2">
               {v.name}
             </Link>
-            {/* <div className="text-sm text-gray-500">Created at {v.created_at}</div> */}
 
-            <div className="flex">
+            {!myClubsOnly && <div className="flex">
               <button
                 disabled={v.club_memberships?.length > 0}
                 className="btn btn-xs btn-success mr-4"
@@ -25,22 +28,11 @@ export default function ClubList({ myClubsOnly }) {
               >
                 Join
               </button>
-            </div>
+            </div> }
           </div>
         ))}
-
-        <div className="flex justify-center gap-x-5">
-          {new Array(numPages).fill(0).map((v, i) => (
-            <div
-              key={i}
-              className="border-r px-5 cursor-pointer hover:bg-purple-500"
-              onClick={() => setPage(i + 1)}
-            >
-              {i + 1}
-            </div>
-          ))}
-        </div>
       </div>
-    </div>
+      <PageBtns cnt={clubCnt} page = {page} setPage={setPage} page_size={page_size}></PageBtns>
+      </>
   );
 }

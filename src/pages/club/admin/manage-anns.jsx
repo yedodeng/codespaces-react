@@ -1,6 +1,7 @@
 import Modal from "../../../components/modal";
 import useAnns from "../../../hooks/useAnns";
 import Announcement from "../../../components/announcement";
+import PageBtns from "../../../components/pagebtns";
 
 export default function ManageAnns({ club_id }) {
   const page_size = 3;
@@ -26,22 +27,7 @@ export default function ManageAnns({ club_id }) {
                 isAdmin={true}
               />
             ))}
-          <div className="flex justify-between">
-            <button
-              onClick={() => setPage(page - 1)}
-              disabled={page == 0}
-              className="btn btn-neutral btn-sm"
-            >
-              Prev
-            </button>
-            <button
-              onClick={() => setPage(page + 1)}
-              disabled={page == Math.ceil(annCnt / page_size) - 1}
-              className="btn btn-neutral btn-sm"
-            >
-              Next
-            </button>
-          </div>
+            <PageBtns cnt={annCnt} page = {page} setPage={setPage} page_size={page_size}></PageBtns>
             <div className="flex justify-end">
               <button
                 className="btn btn-sm btn-primary"
