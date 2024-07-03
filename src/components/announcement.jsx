@@ -15,7 +15,7 @@ export default function Announcement({
           <div>{announcement.text}</div>
           <div className="flex justify-between items-center">
             <div className="text-xs">
-              {new Date(announcement.created_at).toDateString()}
+              {new Date(announcement.created_at).toDateString().slice(4)}
             </div>
             <div className="flex items-center space-x-2">
               <div className="text-xs font-bold">{announcement.author}</div>
@@ -40,7 +40,7 @@ export default function Announcement({
             </div>
           </div>
         </div>
-        <Modal show={modalText} close={() => setModalText(null)}>
+        <Modal show={modalText} close={() => setModalText(null)} btn="Cancel">
           {modalText && (
             <form
               className="w-full flex flex-col space-y-3"

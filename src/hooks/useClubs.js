@@ -7,6 +7,7 @@ export default function useClubs({ page_size = 3, myClubsOnly = false }) {
   let [clubs, setClubs] = useState([]);
   let [page, setPage] = useState(0);
   let [clubCnt, setClubCnt] = useState(0);
+  let [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     loadClubs();
@@ -33,7 +34,7 @@ export default function useClubs({ page_size = 3, myClubsOnly = false }) {
   }
 
   async function loadClubCnt() {
-    const { count  } = myClubsOnly ?
+    const { count } = myClubsOnly ?
      await supabase
     .from("clubs")
     .select("*, club_memberships!inner(*)", { count: "exact", head: true })
@@ -45,38 +46,25 @@ export default function useClubs({ page_size = 3, myClubsOnly = false }) {
     setClubCnt(count);
   }
 
-  async function handleCreateClub() {
-    const name = prompt("Enter club name:");
-    if (name) {
+  async function handleCreateClub(ev) {
+    ev.preventDefault();
+    if (ev.target.name.value) {
       const { data, error } = await supabase
         .from("clubs")
-        .insert({ name })
+        .insert({name: ev.target.name.value} )
         .select();
-      if (error) alert(error.message);
-      else console.log(data);
-    }
-    loadClubs();
-  }
 
-  async function handleUpdateClub(club_id) {
-    let name = prompt("Enter a name for this club");
-    if (name) {
-      const { data, error } = await supabase
-        .from("clubs")
-        .update({ name })
-        .eq("club_id", club_id);
+        setClubs([data, ...clubs]);
+        setShowModal(false);
     }
-    loadClubs();
   }
 
   async function handleDeleteClub(club_id) {
-    if (confirm("Confirm Deletetion>") || true) {
       const { data, error } = await supabase
         .from("clubs")
         .delete()
         .eq("club_id", club_id);
-    }
-    loadClubs();
+    setClubs(clubs.filter((c) => c.club_id != club_id),);
   }
 
   async function handleJoinClub(club_id) {
@@ -94,13 +82,14 @@ export default function useClubs({ page_size = 3, myClubsOnly = false }) {
 
   return {
     handleCreateClub,
-    handleUpdateClub,
     handleDeleteClub,
     handleJoinClub,
     clubs,
     page,
     setPage,
     page_size,
-    clubCnt
+    clubCnt,
+    showModal,
+    setShowModal
   };
 }

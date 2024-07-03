@@ -36,7 +36,7 @@ export default function ManageAnns({ club_id }) {
           </div>
         </div>
       </div>
-      <Modal show={showModal} close={() => setShowModal(false)}>
+      <Modal show={showModal} close={() => setShowModal(false)} btn="Cancel">
         {showModal && (
           <form
             className="w-full flex flex-col space-y-3"

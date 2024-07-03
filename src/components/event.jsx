@@ -14,14 +14,15 @@ export default function Event({
     let [modalText, setModalText] = useState(null);
     let [showReserv, setShowReserv] = useState(false);
     let date = new Date(event.date);
-    let y = date.getFullYear();
-    let m = date.getMonth() + 1;
+    let ar = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    let m = ar[date.getMonth()];
     let d = date.getDate();
+    let t = date.toTimeString().substring(0, 5);
     let p =
         date.toLocaleTimeString().substring(0, 4) +
         " " +
         date.toLocaleTimeString().substring(8, 11);
-    date = `${y}-${m < 10 ? `0${m}` : m}-${d < 10 ? `0${d}` : d}`;
+    date = `${m} ${d}`;
 
     let reserved = event.event_reservations?.find((e) => e.user_id == user.id);
 
@@ -30,7 +31,7 @@ export default function Event({
             <div className="space-y-3 bg-base-300 p-3 rounded ">
                 <div className="flex justify-between items-center">
                     <div className="font-bold text-xl">{event.title}</div>
-                    <div className="text-sm">At {`${p} ${date}`}</div>
+                    <div className="text-sm">On {`${p}, ${date}`}</div>
                 </div>
                 <div>{event.text}</div>
                 <div className="flex justify-between items-center">
@@ -68,7 +69,7 @@ export default function Event({
                     </div>
                 </div>
             </div>
-            <Modal show={showReserv} close={() => setShowReserv(false)}>
+            <Modal show={showReserv} close={() => setShowReserv(false)} btn="Done">
                 {showReserv && (
                     <div>
                         <div className="text-xl text-center font-bold">RSVPs</div>
@@ -84,7 +85,7 @@ export default function Event({
                     </div>
                 )}
             </Modal>
-            <Modal show={modalText} close={() => setModalText(null)}>
+            <Modal show={modalText} close={() => setModalText(null)} btn="Cancel">
                 {modalText && (
                     <form
                         className="w-full flex flex-col space-y-3"

@@ -46,8 +46,7 @@ export default function useAnns({ club_id, page_size }) {
       const { data, error } = await supabase
         .from("announcements")
         .insert(obj)
-        .select()
-        .single();
+        .select();
   
       setAnns([data, ...anns]);
       setShowModal(false);

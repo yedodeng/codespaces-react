@@ -26,5 +26,13 @@ export default function useClub({club_id}) {
       setClub(data);
     }
 
-    return {club, role}
+    async function handleLeaveClub() {
+      const {data, error} = await supabase
+      .from("club_memberships")
+      .delete()
+      .eq("user_id", user_id)
+      .eq("club_id", club_id)
+    }
+
+    return {club, role, handleLeaveClub}
 }

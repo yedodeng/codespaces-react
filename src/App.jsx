@@ -9,6 +9,7 @@ import UserHome from "./pages/userhome";
 import Profile from "./profiles";
 import { supabase } from "./supabaseClient";
 import ClubAdmin from "./pages/club/admin/club-admin";
+import Admin from "./pages/club/admin/clubs-admin";
 
 export const AppContext = createContext(null);
 
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/club/:club_id" element={<Club />}></Route>
             <Route path="/club/:club_id/admin" element={<ClubAdmin />}></Route>
             <Route path="/profile/:user_id" element={<Profile />}></Route>
+            <Route path="/admin" element={<Admin />}></Route>
           </Route>
         </Routes>
       </AppContext.Provider>
@@ -75,9 +77,9 @@ function Layout() {
           <Link to="/about">About Us</Link>
         </div>
         <div className="text-xl font-bold">
-          <Link to="/query">Q</Link>
+          <Link to="/admin">Admin</Link>
         </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-5">
             <div className="text-xl font-bold">
               <Link to={`/profile/${user.id}`}>{user.full_name}</Link>
             </div>
