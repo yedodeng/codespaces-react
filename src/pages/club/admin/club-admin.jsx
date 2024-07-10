@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import ManageDesc from "./manage-desc";
-import ManageName from "./manage-title";
+import ManageTitle from "./manage-name";
 import ManageMembers from "./manage-members";
 import ManageAnns from "./manage-anns";
 import ManageEvents from "./manage-events";
@@ -12,7 +12,7 @@ export default function ClubAdmin() {
   return (
     <div>
       <button className="btn btn-error text-lg" onClick={() => navigate(`/club/${club_id}`)}>Done</button>
-      <ManageName club_id={club_id} />
+      <ManageTitle club_id={club_id} />
       <div className = "my-4"></div>
       <ManageDesc club_id={club_id} />
       <div className = "my-4"></div>

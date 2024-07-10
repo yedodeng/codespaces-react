@@ -18,7 +18,7 @@ export default function useAnns({ club_id, page_size }) {
     }, [club_id]);
   
     async function handleLoadAnnouncementCnt() {
-      const { count, error } = await supabase
+      const { count } = await supabase
         .from("announcements")
         .select("*", { count: "exact", head: true })
         .eq("club_id", club_id);
@@ -27,9 +27,10 @@ export default function useAnns({ club_id, page_size }) {
     }
   
     async function handleLoadAnnouncements() {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("announcements")
         .select("*")
+        .eq("club_id", club_id)
         .order("created_at", { ascending: false })
         .range(page * page_size, page * page_size + page_size - 1);
       
@@ -43,10 +44,11 @@ export default function useAnns({ club_id, page_size }) {
         text: ev.target.text.value,
         author: user.full_name,
       };
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("announcements")
         .insert(obj)
-        .select();
+        .select()
+        .single();
   
       setAnns([data, ...anns]);
       setShowModal(false);
@@ -55,7 +57,7 @@ export default function useAnns({ club_id, page_size }) {
     async function handleEditAnnouncement(ev, close, ann_id) {
       ev.preventDefault();
   
-      const { error } = await supabase
+      await supabase
         .from("announcements")
         .update({ text: ev.target.text.value })
         .eq("ann_id", ann_id);
@@ -68,7 +70,7 @@ export default function useAnns({ club_id, page_size }) {
     }
   
     async function handleDeleteAnnouncement(ann_id) {
-      const { error } = await supabase
+      await supabase
         .from("announcements")
         .delete()
         .eq("ann_id", ann_id);

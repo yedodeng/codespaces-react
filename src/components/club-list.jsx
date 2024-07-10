@@ -22,13 +22,14 @@ export default function ClubList({ myClubsOnly, admin }) {
               {v.name}
             </Link>
             {!myClubsOnly && !admin && <div className="flex">
-              <button
+              <Link
                 disabled={v.club_memberships?.length > 0}
                 className="btn btn-xs btn-success mr-4"
                 onClick={() => handleJoinClub(v.club_id)}
+                to={`/club/${v.club_id}`}
               >
                 Join
-              </button>
+              </Link>
             </div>}
             {admin && (
               <div>

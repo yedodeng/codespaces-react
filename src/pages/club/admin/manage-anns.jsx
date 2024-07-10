@@ -13,6 +13,7 @@ export default function ManageAnns({ club_id }) {
     <>
       <div>
         <div className="text-center text-2xl font-bold p-3">Announcements</div>
+        {anns.length > 0 ? 
         <div className="space-y-3">
           {anns
           .filter((_, i) => page * page_size <= i && i <= page * page_size + page_size - 1)
@@ -34,7 +35,18 @@ export default function ManageAnns({ club_id }) {
               Add Announcement
             </button>
           </div>
-        </div>
+        </div> : 
+        <div className="space-y-3">
+          <div className="text-center text-xl">No Announcements</div>
+          <div className="flex justify-center">
+          <button
+              className="btn btn-md btn-primary w-1/3 text-lg"
+              onClick={() => setShowModal(true)}
+            >
+              Add Announcement
+          </button>
+          </div>
+        </div> }
       </div>
       <Modal show={showModal} close={() => setShowModal(false)} btn="Cancel">
         {showModal && (
