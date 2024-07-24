@@ -6,9 +6,9 @@ export default function Event({
   event,
   handleEditEvent,
   handleDeleteEvent,
-  userIdNameMap,
   handleReserveEvent,
-  isAdmin
+  isAdmin,
+  userIdNameMap,
 }) {
   let { user } = useContext(AppContext);
   let [modalText, setModalText] = useState(null);
@@ -23,7 +23,6 @@ export default function Event({
     " " +
     date.toLocaleTimeString().substring(8, 11);
   date = `${m} ${d}`;
-
   let reserved = event.event_reservations?.find((e) => e.user_id == user.id);
 
   return (

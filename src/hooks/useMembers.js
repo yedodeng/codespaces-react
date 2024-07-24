@@ -3,7 +3,7 @@ import { supabase } from "../supabaseClient";
 
 export default function useMembers({ club_id }) {
   let [members, setMembers] = useState([]);
-  
+
   useEffect(() => {
     if (club_id) loadMembers();
   }, [club_id]);
@@ -21,7 +21,7 @@ export default function useMembers({ club_id }) {
       .from("club_memberships")
       .delete()
       .eq("user_id", user_id);
-    loadMembers();
+    setMembers(members.filter((a) => a.user_id != user_id));
   }
   async function handleUpdateRole(user_id, role) {
     await supabase
@@ -29,7 +29,15 @@ export default function useMembers({ club_id }) {
       .update({ role })
       .eq("club_id", club_id)
       .eq("user_id", user_id);
-    loadMembers();
+    setMembers(members.map((a) =>
+      a.user_id == user_id
+        ? {
+          ...a,
+          role: role
+        }
+        : a
+    ),
+    );
   }
 
   return { members, setMembers, handleDelete, handleUpdateRole };

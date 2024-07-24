@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { Link, Outlet, Route, Routes } from "react-router-dom";
 import About from "./about";
 import Auth from "./auth";
-import Club from "./pages/club/club";
+import Club from "./pages/club";
 import AllClubsPage from "./pages/explore";
 import QueryTest from "./pages/query";
 import UserHome from "./pages/userhome";
@@ -10,6 +10,7 @@ import Profile from "./profiles";
 import { supabase } from "./supabaseClient";
 import ClubAdmin from "./pages/club/admin/club-admin";
 import Admin from "./pages/club/admin/clubs-admin";
+import Calendar from "./pages/club/calendar";
 
 export const AppContext = createContext(null);
 
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="/club/:club_id/admin" element={<ClubAdmin />}></Route>
             <Route path="/profile/:user_id" element={<Profile />}></Route>
             <Route path="/admin" element={<Admin />}></Route>
+            <Route path="/club/:club_id/calendar" element={<Calendar />}></Route>
           </Route>
         </Routes>
       </AppContext.Provider>

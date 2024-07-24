@@ -15,12 +15,15 @@ export default function Club() {
   let { club, role } = useClub({ club_id });
   return (
     <>
-      <div>
+      <div className = "flex justify-between">
         {role === "Admin" && (
           <Link to={`${pathname}/admin`}>
             <button className="btn btn-error text-lg">Admin</button>
           </Link>
         )}
+        <Link to={`${pathname}/calendar`}>
+            <button className="btn btn-primary text-lg">Calendar</button>
+          </Link>
       </div>
       <div className="text-center text-3xl font-bold">
         {club?.name}
@@ -111,7 +114,7 @@ function Announcements({ club_id }) {
 
 function Events({ club_id }) {
   let { events, evCnt, page, setPage, handleReserveEvent } = useEvents({ club_id, page_size });
-
+  console.log(events);
   return (
     <>
     {events?.length > 0 ?
