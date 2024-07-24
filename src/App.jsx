@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { Link, Outlet, Route, Routes } from "react-router-dom";
 import About from "./about";
 import Auth from "./auth";
-import Club from "./pages/club";
+import Club from "./pages/club/club";
 import AllClubsPage from "./pages/explore";
 import QueryTest from "./pages/query";
 import UserHome from "./pages/userhome";
@@ -10,7 +10,8 @@ import Profile from "./profiles";
 import { supabase } from "./supabaseClient";
 import ClubAdmin from "./pages/club/admin/club-admin";
 import Admin from "./pages/club/admin/clubs-admin";
-import Calendar from "./pages/club/calendar";
+import ClubCalendar from "./pages/club/club-calendar";
+import FullCalendar from "./pages/calendar/full-calendar";
 
 export const AppContext = createContext(null);
 
@@ -50,7 +51,8 @@ export default function App() {
             <Route path="/club/:club_id/admin" element={<ClubAdmin />}></Route>
             <Route path="/profile/:user_id" element={<Profile />}></Route>
             <Route path="/admin" element={<Admin />}></Route>
-            <Route path="/club/:club_id/calendar" element={<Calendar />}></Route>
+            <Route path="/club/:club_id/calendar" element={<ClubCalendar />}></Route>
+            <Route path="/calendar" element={<FullCalendar />}></Route>
           </Route>
         </Routes>
       </AppContext.Provider>
@@ -74,9 +76,8 @@ function Layout() {
         <div className="text-xl font-bold">
           <Link to="/all-clubs">Explore</Link>
         </div>
-
         <div className="text-xl font-bold flex-grow">
-          <Link to="/about">About Us</Link>
+          <Link to="/calendar">Calendar</Link>
         </div>
         <div className="text-xl font-bold">
           <Link to="/admin">Admin</Link>

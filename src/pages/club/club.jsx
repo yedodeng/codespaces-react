@@ -12,18 +12,20 @@ const page_size = 3;
 export default function Club() {
   let { club_id } = useParams();
   let { pathname } = useLocation();
-  let { club, role } = useClub({ club_id });
+  let { club, role, handleLeaveClub } = useClub({ club_id });
   return (
     <>
-      <div className = "flex justify-between">
-        {role === "Admin" && (
+      <div className="flex justify-between">
+        {role == "Admin" && (
           <Link to={`${pathname}/admin`}>
             <button className="btn btn-error text-lg">Admin</button>
           </Link>
         )}
+        {role != "Pending" && (
         <Link to={`${pathname}/calendar`}>
-            <button className="btn btn-primary text-lg">Calendar</button>
-          </Link>
+          <button className="btn btn-primary text-lg">Calendar</button>
+        </Link>
+        )}
       </div>
       <div className="text-center text-3xl font-bold">
         {club?.name}
@@ -32,11 +34,14 @@ export default function Club() {
       <div className="text-center text-2xl font-bold p-3">Members</div>
       <Members club={club} role={role} />
       {role != "Pending" ? (
-        <div className="my-4">
+        <div className="space-y-4 mt-4">
           <div className="text-center text-2xl font-bold p-3">Announcements</div>
           <Announcements club_id={club_id} />
-          <div className="mt-4 text-center text-2xl font-bold p-3">Events</div>
+          <div className="text-center text-2xl font-bold p-3">Events</div>
           <Events club_id={club_id} />
+          <div className="flex justify-end">
+            <button className="btn btn-error text-lg" onClick={() => handleLeaveClub()}>Leave Club</button>
+          </div>
         </div>
       ) : (
         <div className="bold text-xl text-center my-4">
@@ -114,26 +119,25 @@ function Announcements({ club_id }) {
 
 function Events({ club_id }) {
   let { events, evCnt, page, setPage, handleReserveEvent } = useEvents({ club_id, page_size });
-  console.log(events);
   return (
     <>
-    {events?.length > 0 ?
-    <div className="space-y-3">
-      {events
-        .filter(
-          (_, i) =>
-            page * page_size <= i && i <= page * page_size + page_size - 1
-        )
-        .map((a) => (
-          <Event
-            key={a.ev_id}
-            event={a}
-            handleReserveEvent={handleReserveEvent}
-            isAdmin={false}
-          />
-        ))}
-      <PageBtns cnt={evCnt} setPage={setPage} page={page} page_size={page_size}></PageBtns>
-    </div> : <div className="text-center text-xl">No Events</div> }
+      {events?.length > 0 ?
+        <div className="space-y-3">
+          {events
+            .filter(
+              (_, i) =>
+                page * page_size <= i && i <= page * page_size + page_size - 1
+            )
+            .map((a) => (
+              <Event
+                key={a.ev_id}
+                event={a}
+                handleReserveEvent={handleReserveEvent}
+                isAdmin={false}
+              />
+            ))}
+          <PageBtns cnt={evCnt} setPage={setPage} page={page} page_size={page_size}></PageBtns>
+        </div> : <div className="text-center text-xl">No Events</div>}
     </>
   );
 }
